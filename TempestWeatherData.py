@@ -4,30 +4,15 @@
 # https://weatherflow.github.io/Tempest/api/
 
 import requests #library that makes the calls to the API URL and the response back from the server.
-#https://pypi.org/project/websockets/
 import json
 from time import strftime, localtime
 
-def getWeatherData():
+def getTempestWeatherData(deviceID):
+    
+    URL = f"https://swd.weatherflow.com/swd/rest/observations/?device_id={deviceID}&token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
 
-    #Prof John Gibbons's house:
-        #https://tempestwx.com/station/169693/grid
-        # Station ID: 169693
-        # Hub serial number: ST-00170041
-        # Token: 71dda2d6-1998-4d22-899d-3d0e5baef2b2
-        # devices: 136516 (outdoor), 403415 (indoor)
-    #CWRU:
-        #https://tempestwx.com/station/86264/grid
-        # Station ID: 86264
-        # Token: bd78ca30-46d4-4407-b4c0-035bc8b045d7
-        # devices: 226978 (outdoor), 226405 (indoor)
-    #GET THE LIST OF DEVICES (see bottom of file):
-        #URL = "https://swd.weatherflow.com/swd/rest/stations?token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
-        
-    URL = "https://swd.weatherflow.com/swd/rest/observations/?device_id=226978&token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
-
-    responseCWRU = requests.get(URL).text
-    parsedData = json.loads(responseCWRU)
+    response = requests.get(URL).text
+    parsedData = json.loads(response)
     observations = parsedData['obs']
     # for more obs info/structure, see link https://apidocs.tempestwx.com/reference/observation-record-format#tempest-observation
     #0 timestamp, 1 wind lull (m/s), 2 wind average (m/s), 3 wind gust (m/s), 4 wind direction (degrees),
@@ -41,18 +26,31 @@ def getWeatherData():
     def mbTOpa(measurement):
         return measurement*100
         
-    CWRUData = {
-        "CWRU": {
-            "timestamp": strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0])),
-            "temperature": observations[0][7],
-            "dewpoint": "N/A",
-            "barometricPressure": mbTOpa(observations[0][6]),
-            "relativeHumidity": observations[0][8]
-        },
+    data = {
+        "timestamp": strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0])),
+        "temperature": observations[0][7],
+        "dewpoint": "N/A",
+        "barometricPressure": mbTOpa(observations[0][6]),
+        "relativeHumidity": observations[0][8]
     }
-    return CWRUData
+    return data
 
-print(getWeatherData())
+#________________________________________________________________________
+print(getTempestWeatherData(226978))
+
+#Prof John Gibbons's house:
+        #https://tempestwx.com/station/169693/grid
+        # Station ID: 169693
+        # Hub serial number: ST-00170041
+        # Token: 71dda2d6-1998-4d22-899d-3d0e5baef2b2
+        # devices: 136516 (outdoor), 403415 (indoor)
+    #CWRU:
+        #https://tempestwx.com/station/86264/grid
+        # Station ID: 86264
+        # Token: bd78ca30-46d4-4407-b4c0-035bc8b045d7
+        # devices: 226978 (outdoor), 226405 (indoor)
+    #GET THE LIST OF DEVICES (see bottom of file):
+        #URL = "https://swd.weatherflow.com/swd/rest/stations?token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
 
 
 #________________________________________________________________________
