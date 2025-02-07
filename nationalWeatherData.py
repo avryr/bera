@@ -5,47 +5,50 @@
 
 import requests #library that makes the calls to the API URL and the response back from the server.
 
+def getWeatherData():
 
-#CLE Hopkins zone
-URL_KCLE = "https://api.weather.gov/stations/KCLE/observations/latest"
-#Burke
-URL_KBKL = "https://api.weather.gov/stations/KBKL/observations/latest"
-#CWRU
-URL_CWRU = "https://api.weather.gov/stations/KBKL/observations/latest"
+    #CLE Hopkins zone
+    URL_KCLE = "https://api.weather.gov/stations/KCLE/observations/latest"
+    #Burke
+    URL_KBKL = "https://api.weather.gov/stations/KBKL/observations/latest"
+    #CWRU
+    URL_CWRU = "https://api.weather.gov/stations/KBKL/observations/latest"
 
-#get the response from the server as a JSON file
-#open URL in browser to see full JSON file
-responseKCLE = requests.get(URL_KCLE) 
-responseKBKL = requests.get(URL_KBKL) 
-responseCWRU = requests.get(URL_CWRU) 
+    #get the response from the server as a JSON file
+    #open URL in browser to see full JSON file
+    responseKCLE = requests.get(URL_KCLE) 
+    responseKBKL = requests.get(URL_KBKL) 
+    responseCWRU = requests.get(URL_CWRU) 
 
-#get relevant data
-forecastKCLE = responseKCLE.json()['properties']
-forecastKBKL = responseKBKL.json()['properties']
-forecastCWRU = responseCWRU.json()['properties']
+    #get relevant data
+    forecastKCLE = responseKCLE.json()['properties']
+    forecastKBKL = responseKBKL.json()['properties']
+    forecastCWRU = responseCWRU.json()['properties']
 
 
-weatherData = {
-    "KCLE": {
-        "timestamp": forecastKCLE['timestamp'],
-        "temperature": forecastKCLE['temperature']['value'],
-        "dewpoint": forecastKCLE['dewpoint']['value'],
-        "barometricPressure": forecastKCLE['barometricPressure']['value'],
-        "relativeHumidity": forecastKCLE['relativeHumidity']['value']
-    },
-    "KBKL": {
-        "timestamp": forecastKBKL['timestamp'],
-        "temperature": forecastKBKL['temperature']['value'],
-        "dewpoint": forecastKBKL['dewpoint']['value'],
-        "barometricPressure": forecastKBKL['barometricPressure']['value'],
-        "relativeHumidity": forecastKBKL['relativeHumidity']['value']
-    },
-    "CWRU": {
-        "timestamp": forecastCWRU['timestamp'],
-        "temperature": forecastCWRU['temperature']['value'],
-        "dewpoint": forecastCWRU['dewpoint']['value'],
-        "barometricPressure": forecastCWRU['barometricPressure']['value'],
-        "relativeHumidity": forecastCWRU['relativeHumidity']['value']
+    weatherData = {
+        "KCLE": {
+            "timestamp": forecastKCLE['timestamp'],
+            "temperature": forecastKCLE['temperature']['value'],
+            "dewpoint": forecastKCLE['dewpoint']['value'],
+            "barometricPressure": forecastKCLE['barometricPressure']['value'],
+            "relativeHumidity": forecastKCLE['relativeHumidity']['value']
+        },
+        "KBKL": {
+            "timestamp": forecastKBKL['timestamp'],
+            "temperature": forecastKBKL['temperature']['value'],
+            "dewpoint": forecastKBKL['dewpoint']['value'],
+            "barometricPressure": forecastKBKL['barometricPressure']['value'],
+            "relativeHumidity": forecastKBKL['relativeHumidity']['value']
+        },
+        "CWRU": {
+            "timestamp": forecastCWRU['timestamp'],
+            "temperature": forecastCWRU['temperature']['value'],
+            "dewpoint": forecastCWRU['dewpoint']['value'],
+            "barometricPressure": forecastCWRU['barometricPressure']['value'],
+            "relativeHumidity": forecastCWRU['relativeHumidity']['value']
+        }
     }
-}
-print(weatherData)
+    return weatherData
+
+print(getWeatherData())
