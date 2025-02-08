@@ -7,10 +7,21 @@ import requests #library that makes the calls to the API URL and the response ba
 import json
 from time import strftime, localtime
 
-def getTempestWeatherData(deviceID):
-    
-    URL = f"https://swd.weatherflow.com/swd/rest/observations/?device_id={deviceID}&token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
+def TempestWeatherData(token):
+    deviceID = getDeviceIDFromToken(token)
+    return getWeatherDataFromDevice(token, deviceID)
 
+def getDeviceIDFromToken(token):
+    URL = f"https://swd.weatherflow.com/swd/rest/stations?token={token}"
+    response = requests.get(URL).text
+    parsedData = json.loads(response)
+    deviceList = parsedData["stations"][0]['devices']
+    device = next((d for d in deviceList if d["device_meta"]["environment"] == "outdoor"), None)
+    return device['device_id']
+
+
+def getWeatherDataFromDevice(token, deviceID):
+    URL = f"https://swd.weatherflow.com/swd/rest/observations/?device_id={deviceID}&token={token}"
     response = requests.get(URL).text
     parsedData = json.loads(response)
     observations = parsedData['obs']
@@ -26,17 +37,42 @@ def getTempestWeatherData(deviceID):
     def mbTOpa(measurement):
         return measurement*100
         
+    def getPrecipitationType(measurement):
+        typeList = ["none", "Nearcast value with display on", "Nearcast value with display off"]
+        return typeList[measurement]
+    
+    def getPrecipitationAnalysisType(measurement):
+        typeList = ["none", "rain", "hail", "rain + hail"]
+        return typeList[measurement]
+
     data = {
-        "timestamp": strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0])),
-        "temperature": observations[0][7],
-        "dewpoint": "N/A",
-        "barometricPressure": mbTOpa(observations[0][6]),
-        "relativeHumidity": observations[0][8]
+        "timestamp": {"value": strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0])), "units": "[timestamp]"},
+        "windLull": {"value": observations[0][1], "units": "m/s"},
+        "windSpeed": {"value": observations[0][2], "units": "m/s"},
+        "windGust": {"value": observations[0][3], "units": "m/s"},
+        "windDirection": {"value": observations[0][4], "units": "degrees"},
+        "intervalWindSampling": {"value": observations[0][5], "units": "secs"},
+        "barometricPressure": {"value": mbTOpa(observations[0][6]), "units": "Pa"},
+        "temperature": {"value": observations[0][7], "units": "degC"},
+        "relativeHumidity": {"value": observations[0][8], "units": "%"},
+        "illuminance": {"value": observations[0][9], "units": "lux"},
+        "uv": {"value": observations[0][10], "units": "index"},
+        "solarRadiation": {"value": observations[0][11], "units": "W/m²"},
+        "rainAccumulationOverInterval": {"value": observations[0][12], "units": "mm"},
+        "precipitationType": {"value": getPrecipitationType(observations[0][13]), "units": "[type]"},
+        "lightningAverageDistance": {"value": observations[0][14], "units": "[timestamp]"},
+        "lightningStrikeCountOverInterval": {"value": observations[0][15], "units": "km"},
+        "battery": {"value": observations[0][16], "units": "V"},
+        "interval": {"value": observations[0][17]*60, "units": "secs"},
+        "rainAccumulationLastDay": {"value": observations[0][18], "units": "mm"},
+        "nearcastRainAccumulation": {"value": observations[0][19], "units": "mm"},
+        "nearcastRainAccumulationLastDay": {"value": observations[0][20], "units": "mm"},
+        "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"}
     }
     return data
 
 #________________________________________________________________________
-print(getTempestWeatherData(226978))
+print(TempestWeatherData("bd78ca30-46d4-4407-b4c0-035bc8b045d7"))
 
 #Prof John Gibbons's house:
         #https://tempestwx.com/station/169693/grid
@@ -49,9 +85,6 @@ print(getTempestWeatherData(226978))
         # Station ID: 86264
         # Token: bd78ca30-46d4-4407-b4c0-035bc8b045d7
         # devices: 226978 (outdoor), 226405 (indoor)
-    #GET THE LIST OF DEVICES (see bottom of file):
-        #URL = "https://swd.weatherflow.com/swd/rest/stations?token=bd78ca30-46d4-4407-b4c0-035bc8b045d7"
-
 
 #________________________________________________________________________
 #
