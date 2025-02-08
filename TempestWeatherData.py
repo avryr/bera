@@ -13,8 +13,10 @@ def TempestWeatherData(token):
 
 def getDeviceIDFromToken(token):
     URL = f"https://swd.weatherflow.com/swd/rest/stations?token={token}"
-    response = requests.get(URL).text
-    parsedData = json.loads(response)
+    response = requests.get(URL)
+    if (response.status_code != 200):
+        raise Exception("Your token is invalid or expired.")
+    parsedData = json.loads(response.text)
     deviceList = parsedData["stations"][0]['devices']
     device = next((d for d in deviceList if d["device_meta"]["environment"] == "outdoor"), None)
     return device['device_id']
@@ -72,7 +74,15 @@ def getWeatherDataFromDevice(token, deviceID):
     return data
 
 #________________________________________________________________________
-print(TempestWeatherData("bd78ca30-46d4-4407-b4c0-035bc8b045d7"))
+def main():
+    token = input("Please enter the tempest Auth Token: ")
+    data = TempestWeatherData(token)
+    print(data)
+    return data
+
+if __name__ == "__main__":
+    main()
+
 
 #Prof John Gibbons's house:
         #https://tempestwx.com/station/169693/grid
