@@ -4,7 +4,7 @@
 
 import requests #library that makes the calls to the API URL and the response back from the server.
 
-def getWeatherData():
+def NationalWeatherData():
 
     #CLE Hopkins zone
     URL_KCLE = "https://api.weather.gov/stations/KCLE/observations/latest"
@@ -38,4 +38,4 @@ def getWeatherData():
     }
     return weatherData
 
-print(getWeatherData())
+#print(getWeatherData())

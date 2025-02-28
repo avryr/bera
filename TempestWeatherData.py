@@ -69,7 +69,8 @@ def getWeatherDataFromDevice(token, deviceID):
         "rainAccumulationLastDay": {"value": observations[0][18], "units": "mm"},
         "nearcastRainAccumulation": {"value": observations[0][19], "units": "mm"},
         "nearcastRainAccumulationLastDay": {"value": observations[0][20], "units": "mm"},
-        "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"}
+        "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"},
+        "dewpoint": {"value": None, "units": None}
     }
     return data
 
