@@ -1,6 +1,7 @@
 #Relevant links
 # https://justinbraun.com/python-101-pulling-the-weather-forecast-with-the-nws-api/
 # http://pythonsnacks.com/p/a-guide-on-using-the-national-weather-service-api-with-python
+from datetime import datetime, timezone
 
 import requests #library that makes the calls to the API URL and the response back from the server.
 
@@ -22,7 +23,7 @@ def NationalWeatherData():
 
     weatherData = {
         "KCLE": {
-            "timestamp": forecastKCLE['timestamp'],
+            "timestamp": datetime.fromisoformat(forecastKCLE['timestamp']),
             "temperature": forecastKCLE['temperature']['value'],
             "dewpoint": forecastKCLE['dewpoint']['value'],
             "barometricPressure": forecastKCLE['barometricPressure']['value'],

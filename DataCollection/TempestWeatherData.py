@@ -2,6 +2,8 @@
 # https://justinbraun.com/python-101-pulling-the-weather-forecast-with-the-nws-api/
 # http://pythonsnacks.com/p/a-guide-on-using-the-national-weather-service-api-with-python
 # https://weatherflow.github.io/Tempest/api/
+from datetime import datetime, timezone
+
 
 import requests #library that makes the calls to the API URL and the response back from the server.
 import json
@@ -48,7 +50,7 @@ def getWeatherDataFromDevice(token, deviceID):
         return typeList[measurement]
 
     data = {
-        "timestamp": {"value": strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0])), "units": "[timestamp]"},
+        "timestamp": {"value": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))), "units": "[timestamp]"},
         "windLull": {"value": observations[0][1], "units": "m/s"},
         "windSpeed": {"value": observations[0][2], "units": "m/s"},
         "windGust": {"value": observations[0][3], "units": "m/s"},
