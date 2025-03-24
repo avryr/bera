@@ -1,21 +1,24 @@
-#pip install pymongo
 from pymongo import MongoClient
+from datetime import datetime, timezone
+
 
 def getConnectionString():
-    return "mongodb://username:password@host:port/", "your_database_name"
+    return "mongodb+srv://data-inputter:nxMT0g8RdMLmsm1P@bera.1e3b4.mongodb.net", "Bera"
 
 def uploadToDatabase(collectionName, valuesDict):
     CONNECTION_STRING, database = getConnectionString()
 
-    client = MongoClient(CONNECTION_STRING)
+    client = MongoClient(CONNECTION_STRING) 
     db = client[database]  # Access the database
     collection = db[collectionName]  # Access the collection
 
-    document = {"timestamp": valuesDict["timestamp"]['value'],
-                "temperature": valuesDict["temperature"]['value'],
-                "barometricPressure": valuesDict["barometricPressure"]['value'],
-                "relativeHumidity": valuesDict["relativeHumidity"]['value'],
-                "dewpoint": valuesDict["dewpoint"]["value"]}
+    document = {
+        "timestamp": valuesDict.get("timestamp", {}).get("value", None),
+        "temperature": valuesDict.get("temperature", {}).get("value", None),
+        "barometricPressure": valuesDict.get("barometricPressure", {}).get("value", None),
+        "relativeHumidity": valuesDict.get("relativeHumidity", {}).get("value", None),
+        "dewpoint": valuesDict.get("dewpoint", {}).get("value", None),
+    }
         
     inserted_id = collection.insert_one(document).inserted_id
     client.close()
@@ -24,11 +27,45 @@ def uploadToDatabase(collectionName, valuesDict):
 def selectAllFromDatabase(collectionName):
     CONNECTION_STRING, database = getConnectionString()
     
+    client = MongoClient(CONNECTION_STRING) 
+    db = client[database]  # Access the database
+    collection = db[collectionName]  # Access the collection
+
+    docs = list(collection.find())
+    client.close()
+    return docs
+
+def clearCollection(collectionName):
+    CONNECTION_STRING, database = getConnectionString()
+
     client = MongoClient(CONNECTION_STRING)
     db = client[database]  # Access the database
     collection = db[collectionName]  # Access the collection
 
-    docs =  list(collection.find())
+    collection.delete_many({})
     client.close()
-    return docs
 
+def test_connection():
+    CONNECTION_STRING, database = getConnectionString()
+    
+    try:
+        client = MongoClient(CONNECTION_STRING)
+        db = client[database]  # Access the database
+        client.admin.command("ping")  # Test connection
+        print("Connected to MongoDB successfully!")
+        client.close()
+    except Exception as e:
+        print(f"Connection failed: {e}")
+
+def test_upload():
+    uploadToDatabase("CWRU", {
+        "timestamp": {"value": datetime.now(timezone.utc)},
+        "temperature": {"value": 0.0},
+        "barometricPressure": {"value": 0.0},
+        "relativeHumidity": {"value": 0.0},
+        "dewpoint": {"value": 0.0},
+    })
+    
+    print(selectAllFromDatabase("CWRU"))
+    clearCollection("CWRU")
+    print(selectAllFromDatabase("CWRU"))
