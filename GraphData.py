@@ -1,12 +1,13 @@
-import database_connection
 import matplotlib.pyplot as plt
 import datetime
+from datetime import datetime, timezone
+import DataCollection.database_connection
 
 
 def GraphWeatherData(ax, locationList, parameter):
 
     for loc in range(len(locationList)):
-        rawData = database_connection.selectAllFromDatabase(locationList[loc])
+        rawData = DataCollection.database_connection.selectAllFromDatabase(locationList[loc])
 
         timestamps = [datetime.datetime.strptime(doc["timestamp"], "%Y-%m-%d %H:%M:%S") for doc in rawData]
         collectedData = [doc[parameter] for doc in rawData]  # Adjust key as needed
@@ -24,7 +25,7 @@ def GraphWeatherData(ax, locationList, parameter):
     ax.show()  # Keep the plot open after the loop
     
 def GraphBitrateData(ax):
-    rawData = database_connection.selectAllFromDatabase("Radio")
+    rawData = DataCollection.database_connection.selectAllFromDatabase("Radio")
     timestamps = [datetime.datetime.strptime(doc["timestamp"], "%Y-%m-%d %H:%M:%S") for doc in rawData]
     collectedData = [doc["bitErrors"] for doc in rawData]  # Adjust key as needed
     ax.plot(timestamps, collectedData, marker=".", linestyle="-")
