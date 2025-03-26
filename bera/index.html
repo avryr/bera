@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>BERA Homepage</title>
+    <link rel="stylesheet" href="src\main.css">   
+    <script src="src\app.js" type="module"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-2 pageTitle">
+                <img src="bera.png" alt="BERA Logo">
+            </div>
+            <div class="col-sm-10">
+                <div class="row header">
+                    <div class="col-sm-9 d-flex justify-content-center align-items-center" style="min-height:100%">
+                        <div class="panel panel-body locationDisplay">
+                            <span id="loc1"></span> <i class="arrow fa-solid fa-arrow-right"></i> <span id="loc2"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-2">
+                        <div class="d-flex justify-content-center align-items-center" style="min-height: 100%;">
+                            <button type="button" class="btn locationBtn">Change Location</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2 sidebar">
+                <h1>Data</h1>
+                <hr>
+                <div class="checks">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="precip">
+                        <label class="form-check-label" for="precip">
+                            Precipitation
+                        </label>
+                    </div>
+                    <p></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="temp">
+                        <label class="form-check-label" for="temp">
+                            Temperature
+                        </label>
+                    </div>
+                    <p></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="humid">
+                        <label class="form-check-label" for="humid">
+                            Humidity
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2 setToBottom">
+                <hr>
+                <div class="sideLink">
+                    <a href="https://github.com/avryr/bera">Link to our GitHub...</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
