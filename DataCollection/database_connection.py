@@ -1,12 +1,9 @@
 from pymongo import MongoClient
 from datetime import datetime, timezone
-
-
-def getConnectionString():
-    return "mongodb+srv://data-inputter:nxMT0g8RdMLmsm1P@bera.1e3b4.mongodb.net", "Bera"
+import getConnectionString
 
 def uploadToDatabase(collectionName, valuesDict):
-    CONNECTION_STRING, database = getConnectionString()
+    CONNECTION_STRING, database = getConnectionString.getConnectionString()
 
     client = MongoClient(CONNECTION_STRING) 
     db = client[database]  # Access the database
@@ -25,7 +22,7 @@ def uploadToDatabase(collectionName, valuesDict):
     return inserted_id
     
 def selectAllFromDatabase(collectionName):
-    CONNECTION_STRING, database = getConnectionString()
+    CONNECTION_STRING, database = getConnectionString.getConnectionString()
     
     client = MongoClient(CONNECTION_STRING) 
     db = client[database]  # Access the database
@@ -36,7 +33,7 @@ def selectAllFromDatabase(collectionName):
     return docs
 
 def clearCollection(collectionName):
-    CONNECTION_STRING, database = getConnectionString()
+    CONNECTION_STRING, database = getConnectionString.getConnectionString()
 
     client = MongoClient(CONNECTION_STRING)
     db = client[database]  # Access the database
@@ -46,7 +43,7 @@ def clearCollection(collectionName):
     client.close()
 
 def test_connection():
-    CONNECTION_STRING, database = getConnectionString()
+    CONNECTION_STRING, database = getConnectionString.getConnectionString()
     
     try:
         client = MongoClient(CONNECTION_STRING)
@@ -69,3 +66,5 @@ def test_upload():
     print(selectAllFromDatabase("CWRU"))
     clearCollection("CWRU")
     print(selectAllFromDatabase("CWRU"))
+
+test_upload()
