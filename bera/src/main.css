@@ -72,3 +72,14 @@ button.btn.locationBtn:hover{
 a{
     color: #968ABD!important;
 }
+.logo{
+    height: 15vh;
+}
+.charts{
+    color: #352F43;
+    padding-top: 10px;
+    padding-left: 20px;
+}
+#precipChart, #tempChart, #humidChart{
+    display: none;
+}
