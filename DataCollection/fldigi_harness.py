@@ -10,7 +10,7 @@ import string
 
 
 # Configuration - ADJUST THESE AS NEEDED
-OTHER_HOST = 'localhost'  # Replace with the IP address of the other machine
+OTHER_HOST = 'localhost'  # Replace with the IP address of the other machine. Replace with Tailscale IP for multi-machine testing
 PORT = 12345            # Port for internet communication
 MODE = "QPSK250"          # Modem mode (e.g., BPSK31, BPSK63, RTTY)
 CARRIER_FREQ = 1500     # Audio carrier frequency (Hz)
