@@ -2,8 +2,8 @@ import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 //default locations for top bar
-var defaultLoc1 = 'CWRU';
-var defaultLoc2 = 'NASA';
+const defaultLoc1 = 'W8EDU';
+const defaultLoc2 = 'NA8SA';
 //funcs
 function changeLocs(loc1, loc2){
     $('#loc1').text(loc1);
@@ -11,7 +11,6 @@ function changeLocs(loc1, loc2){
 }
 window.toggleChart = function toggleChart(divID){
     $(divID).toggle();
-    console.log(divID + " clicked!");
 }
 /*
 !!! document ready function !!!
