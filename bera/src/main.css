@@ -1,6 +1,7 @@
 body{
     background-color: #F4F4F4;
-
+    -webkit-user-select: none;
+    user-select: none;
 }
 .pageTitle{
     background-color: #352F43;
@@ -39,6 +40,7 @@ button.btn.locationBtn:hover{
     height: 85vh;
     padding: 10px;
     color: #352F43;
+    position: sticky;
 }
 .checks{
     margin-left: 10px;
@@ -74,6 +76,8 @@ a{
 }
 .logo{
     height: 10vh;
+    position: sticky;
+    position: stick
 }
 .charts{
     color: #352F43;
@@ -82,4 +86,13 @@ a{
 }
 #precipChart, #tempChart, #humidChart{
     display: none;
+}
+.dates{
+    color: #352F43;
+}
+.dateInput{
+    color: #352F43;
+    background-color: #F4F4F4;
+    margin-left: 3px;
+    font-size: 15px;
 }
