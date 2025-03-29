@@ -1,4 +1,4 @@
-export function GET(request) {
+export function GET(request: Request) {
     //return new Response('Cheddar');
     return new Response('Cheddar', {
         headers: {

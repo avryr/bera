@@ -1,3 +1,4 @@
 DataCollection/getConnectionString.py
 .vercel
 node_modules
+.next

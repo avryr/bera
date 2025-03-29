@@ -52,7 +52,23 @@ export default function Home() {
                     {/* Change Location Button */}
                     <div className="col-sm-2">
                         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100%" }}>
-                            <button type="button" className="btn locationBtn">Change Location</button>
+                            <button 
+                                type="button" 
+                                className="btn locationBtn"
+                                onClick={() => {
+                                    fetch('/api/get-cheese')
+                                        .then(response => response.text())
+                                        .then(data => {
+                                            $('.locationBtn').text(data);
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching cheese data:', error);
+                                            $('.locationBtn').text('Error loading');
+                                        });
+                                }}
+                            >
+                                Get Cheese
+                            </button>
                         </div>
                     </div>
                 </div>
