@@ -50,6 +50,8 @@ button.btn.locationBtn:hover {
 .checks {
   margin-left: 10px;
   font-size: 20px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .form-check-input {

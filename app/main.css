@@ -1,6 +1,6 @@
 body{
     background-color: #F4F4F4;
-
+    
 }
 .pageTitle{
     background-color: #352F43;
@@ -43,6 +43,8 @@ button.btn.locationBtn:hover{
 .checks{
     margin-left: 10px;
     font-size: 20px;
+    -webkit-user-select: none;
+    user-select: none;
 }
 .form-check-input{
     background-color: #352f4300!important;
