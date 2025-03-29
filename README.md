@@ -1,11 +1,36 @@
-# BERA (Bit Error Rate Analysis)
-## An Analysis & Visualization Platform for Atmospheric Propagation Research
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A platform which performs automated measurement of bit error rates at minimal transmission power in the amateur bands between 1.24 and 24 GHz, using various data transmission modes.
+## Getting Started
 
-The system will correlate error rates against atmospheric moisture, temperature, precipitation amount and other meteorological data along the path. Since NASA Glenn is located within the meteorological prediction range of an FAA Class B airport, the National Weather Service provides excellent and publicly available weather for the specific area of interest.
-Three key systems/services constitute this platform: weather collection, radio transmission/reception, and the web interface which presents the data and allows for its analysis. These three services are connected via an established API, and data is stored in a database.
+First, run the development server:
 
-1) navigate to src folder in command prompt
-2) `npm install` if needed
-3) `npm run dev`
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
