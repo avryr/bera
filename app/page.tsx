@@ -7,8 +7,8 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useEffect } from 'react';
 
 //default locations for top bar
-var defaultLoc1 = 'CWRU';
-var defaultLoc2 = 'NASA';
+const defaultLoc1 = 'W8EDU';
+const defaultLoc2 = 'NA8SA';
 //funcs
 function changeLocs(loc1 : string, loc2 : string) {
     // Set the text of the location spans
@@ -37,7 +37,7 @@ export default function Home() {
         {/* Header */}
         <div className="row">
             {/* Logo */}
-            <div className="col-sm-2 pageTitle">
+            <div className="col-sm-2 pageTitle d-flex justify-content-center align-items-center">
                 <img src="/bera.svg" className="logo" alt="BERA Logo" />
             </div>
             {/* Location Display */}
@@ -105,6 +105,10 @@ export default function Home() {
             </div>
             {/* Sidebar Footer */}
             <div className="col-sm-2 setToBottom">
+                <div className ="dates">
+                    <h4>From</h4>
+                    <input type="date" className="dateInput"></input> to <input type="date" className="dateInput"></input>
+                </div>
                 <hr />
                 <div className="sideLink">
                     <a href="https://github.com/avryr/bera">Link to our GitHub...</a>

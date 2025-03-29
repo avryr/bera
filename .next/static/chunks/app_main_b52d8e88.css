@@ -1,0 +1,120 @@
+/* [project]/app/main.css [app-client] (css) */
+body {
+  background-color: #f4f4f4;
+}
+
+.pageTitle {
+  background-color: #352f43;
+  color: #fff;
+  padding: 0;
+  margin: 0;
+}
+
+.header {
+  background-color: #67597a;
+  height: 15vh;
+}
+
+.locationDisplay {
+  color: #352f43;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  font-size: clamp(40px, 5vw, 65px);
+  margin: 10px;
+  text-align: center;
+  max-height: 75%;
+  width: 50vw;
+}
+
+.arrow {
+  color: #67597a;
+}
+
+button.btn.locationBtn {
+  background-color: #c4baff;
+  font-size: clamp(16px, 2svw, 23px);
+  padding: 10px;
+}
+
+button.btn.locationBtn:hover {
+  background-color: #c4baff9f;
+}
+
+.sidebar {
+  background-color: #e2def6;
+  height: 85vh;
+  padding: 10px;
+  color: #352f43;
+}
+
+.checks {
+  margin-left: 10px;
+  font-size: 20px;
+}
+
+.form-check-input {
+  background-color: #352f4300 !important;
+  border-color: #352f43 !important;
+}
+
+.form-check-input:checked {
+  background-color: #352f43 !important;
+  border-color: #352f43 !important;
+}
+
+.form-check-input:checked:focus {
+  box-shadow: 0 0 5px #352f43 !important;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 5px #352f43 !important;
+}
+
+.setToBottom {
+  position: fixed;
+  bottom: 0;
+}
+
+.sideLink {
+  padding-top: 0;
+  padding-bottom: 20px;
+  padding-left: 10px;
+}
+
+a {
+  color: #968abd !important;
+}
+
+.logo {
+  height: 10vh;
+}
+
+.charts {
+  color: #352f43;
+  padding-top: 10px;
+  padding-left: 20px;
+}
+
+#precipChart, #tempChart, #humidChart {
+  display: none;
+}
+
+.dates {
+  color: #352f43;
+}
+
+.dateInput {
+  color: #352f43;
+  background-color: #f4f4f4;
+  border-color: #352f43;
+  border-radius: 5px;
+  border-width: 1px;
+}
+
+.dateInput:focus {
+  outline-style: outset;
+  outline-width: 3px;
+  outline-color: #968abd9f;
+}
+
+/*# sourceMappingURL=app_main_b52d8e88.css.map*/
