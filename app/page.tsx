@@ -56,18 +56,10 @@ export default function Home() {
                                 type="button" 
                                 className="btn locationBtn"
                                 onClick={() => {
-                                    fetch('/api/get-cheese')
-                                        .then(response => response.text())
-                                        .then(data => {
-                                            $('.locationBtn').text(data);
-                                        })
-                                        .catch(error => {
-                                            console.error('Error fetching cheese data:', error);
-                                            $('.locationBtn').text('Error loading');
-                                        });
+                                    console.log("Change Location button clicked!");
                                 }}
                             >
-                                Get Cheese
+                                Change Location
                             </button>
                         </div>
                     </div>
