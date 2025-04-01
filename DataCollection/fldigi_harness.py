@@ -7,6 +7,9 @@ import sys
 import select
 import logging
 import string
+from pymongo import MongoClient
+from datetime import datetime
+import pytz
 
 
 # Configuration - ADJUST THESE AS NEEDED
@@ -14,8 +17,8 @@ OTHER_HOST = 'localhost'  # Replace with the IP address of the other machine. Re
 PORT = 12345            # Port for internet communication
 MODE = "QPSK250"          # Modem mode (e.g., BPSK31, BPSK63, RTTY)
 CARRIER_FREQ = 1500     # Audio carrier frequency (Hz)
-PACKET_SIZE = 1000       # Number of bits per packet
-NUM_PACKETS = 2        # Number of packets to send for testing
+PACKET_SIZE = 100       # Number of bits per packet
+NUM_PACKETS = 1        # Number of packets to send for testing
 TX_DELAY = 2            # Add a delay between send and listen to allow RX machine to catch up
 SQUELCH = 25             # Squelch Level
 
@@ -185,6 +188,29 @@ def handle_client_connection(conn, fldigi_client, is_sender):
             logger.info(f"Expected data: {all_expected_data.decode('utf-8', errors='ignore')}")
             logger.info(f"Received data: {all_received_data.decode('utf-8', errors='ignore')}")
             logger.info(f"Overall Bit Error Rate: {ber:.4f}")
+            # Connect to MongoDB and save the results
+            try:
+                # MongoDB connection details
+                mongo_client = MongoClient('mongodb+srv://data-inputter:nxMT0g8RdMLmsm1P@bera.1e3b4.mongodb.net')
+                db = mongo_client['Bera']
+                collection = db['Radio']
+                
+                # Create document with test results
+                result_doc = {
+                    'timestamp': datetime.now(tz=pytz.utc),
+                    'mode': MODE,
+                    'bitsPerPacket': PACKET_SIZE,
+                    'numPackets': NUM_PACKETS,
+                    'bitErrorRate': ber,
+                    'bitsSent': all_expected_data.decode('utf-8', errors='ignore'),
+                    'bitsReceived': all_received_data.decode('utf-8', errors='ignore')
+                }
+                
+                # Insert the document into the collection
+                result = collection.insert_one(result_doc)
+                logger.info(f"Results saved to MongoDB with ID: {result.inserted_id}")
+            except Exception as e:
+                logger.error(f"Failed to save results to MongoDB: {e}")
 
     except (BrokenPipeError, ConnectionResetError) as e:
         logger.error(f"Connection error: {e}")
