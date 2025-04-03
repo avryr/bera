@@ -44,10 +44,9 @@ export async function GET(request: NextRequest) {
         // Connect to the database
         const client = await connectToDatabase();
         const db = client.db('Bera'); // fixme andrej: maybe make this an environment variable?
-        const collection = db.collection('Radio'); // fixme andrej: maybe make this an environment variable?
-
+        
         // Validate that the metric exists in the schema
-        const validMetrics = [
+        const validSignalMetrics = [
             'bitsPerPacket',
             'numPackets',
             'bitErrorRate',
@@ -57,9 +56,20 @@ export async function GET(request: NextRequest) {
             'power'
         ];
 
-        if (!validMetrics.includes(metric)) {
+        const validWeatherMetrics = [
+            'temperature',
+            'relativeHumidity'
+        ]
+        
+        // Determine which collection to use based on the metric
+        //const collectionName = metric === 'temperature' ? 'CWRU' : 'Radio';
+        const collectionName = validSignalMetrics.includes(metric) ? 'Radio' : 'CWRU';
+        const collection = db.collection(collectionName);
+            
+
+        if (!validSignalMetrics.includes(metric) && !validWeatherMetrics.includes(metric)) {
             return NextResponse.json(
-                { error: `Invalid metric. Choose one of: ${validMetrics.join(', ')}` },
+                { error: `Invalid metric. Choose one of: ${validSignalMetrics.join(', ')} or ${validWeatherMetrics.join(', ')}` },
                 { status: 400 }
             );
         }
@@ -76,12 +86,6 @@ export async function GET(request: NextRequest) {
             .project(projection)
             .sort({ timestamp: 1 })
             .toArray();
-
-        // DEBUG: log entire collection
-        const allData = await collection.find({}).toArray();
-        console.log('All data:', allData);
-        // DEBUG: log the data being sent to the client
-        console.log('Data being sent to the client:', data);
 
         // Format the response
         const chartData = {

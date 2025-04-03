@@ -4,7 +4,9 @@ import Image from "next/image";
 import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
 
 //default locations for top bar
 const defaultLoc1 = 'W8EDU';
@@ -28,6 +30,220 @@ function useInitialization() {
     $('input[type=checkbox]').prop('checked', false);
   }, []); // Empty dependency array means this runs once on mount... I hope
 }
+
+ // Register Chart.js components
+ Chart.register(...registerables);
+
+// Temperature chart component
+const TemperatureChart = () => {
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Bit Error Rate',
+                data: [],
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                tension: 0.1
+            },
+            {
+                label: 'Temperature',
+                data: [],
+                fill: false,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                tension: 0.1
+            }
+        ]
+    });
+    
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Fetch bit error rate data
+        const berPromise = fetch('/api/get-chart?metric=bitErrorRate')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch BER data');
+                return response.json();
+            });
+        
+        // Fetch temperature data
+        const tempPromise = fetch('/api/get-chart?metric=temperature')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch temperature data');
+                return response.json();
+            });
+
+        // Wait for both requests to complete
+        Promise.all([berPromise, tempPromise])
+            .then(([berData, tempData]) => {
+                setChartData({
+                    labels: berData.x, // both datasets have the same x values
+                    datasets: [
+                        {
+                            ...chartData.datasets[0],
+                            data: berData.y
+                        },
+                        {
+                            ...chartData.datasets[1],
+                            data: tempData.y
+                        }
+                    ]
+                });
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Error fetching chart data:', err);
+                setError(err.message);
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) return <div>Loading chart data...</div>;
+    if (error) return <div>Error loading chart data: {error}</div>;
+
+    const options = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Values'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time'
+                }
+            }
+        }
+    };
+
+    return <Line data={chartData} options={options} />;
+};
+
+const HumidityChart = () => {
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Bit Error Rate',
+                data: [],
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                tension: 0.1,
+                yAxisID: 'y-ber'
+            },
+            {
+                label: 'Humidity',
+                data: [],
+                fill: false,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                tension: 0.1,
+                yAxisID: 'y-humidity'
+            }
+        ]
+    });
+    
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Fetch bit error rate data
+        const berPromise = fetch('/api/get-chart?metric=bitErrorRate')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch BER data');
+                return response.json();
+            });
+        
+        // Fetch humidity data
+        const humidityPromise = fetch('/api/get-chart?metric=relativeHumidity')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch humidity data');
+                return response.json();
+            });
+
+        // Wait for both requests to complete
+        Promise.all([berPromise, humidityPromise])
+            .then(([berData, humidityData]) => {
+                // Find max BER value for scaling
+                const berMax = Math.max(...berData.y);
+                
+                setChartData({
+                    labels: berData.x, // both datasets have the same x values
+                    datasets: [
+                        {
+                            ...chartData.datasets[0],
+                            data: berData.y
+                            //originalData: berData.y // store original values for tooltips
+                        },
+                        {
+                            ...chartData.datasets[1],
+                            data: humidityData.y
+                        }
+                    ]
+                });
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Error fetching chart data:', err);
+                setError(err.message);
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) return <div>Loading chart data...</div>;
+    if (error) return <div>Error loading chart data: {error}</div>;
+
+    const options = {
+        responsive: true,
+        scales: {
+            'y-humidity': {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Humidity (%)'
+                },
+                grid: {
+                    drawOnChartArea: true
+                }
+            },
+            'y-ber': {
+                type: 'linear',
+                position: 'right',
+                min: 0,
+                title: {
+                    display: true,
+                    text: 'Bit Error Rate (normalized)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time'
+                }
+            }
+        }
+    };
+
+    return <Line data={chartData} options={options} />;
+};
+
 
 export default function Home() {
   useInitialization(); // document.ready replacement
@@ -133,11 +349,17 @@ export default function Home() {
                 <div id="tempChart">
                     <h2>Temperature</h2>
                     <hr />
+                    <div className="chart-container" style={{ height: '400px' }}>
+                        <TemperatureChart />
+                    </div>
                 </div>
                 {/* Humidity */}
                 <div id="humidChart">
                     <h2>Humidity</h2>
                     <hr />
+                    <div className="chart-container" style={{ height: '400px' }}>
+                        <HumidityChart />
+                    </div>
                 </div>
             </div>
         </div>
