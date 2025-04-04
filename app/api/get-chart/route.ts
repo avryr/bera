@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
         // Get the metric being charted from query parameters
         const searchParams = request.nextUrl.searchParams;
         const metric = searchParams.get('metric');
+        const dateFrom = searchParams.get('dateFrom');
+        const dateTo = searchParams.get('dateTo');
 
         if (!metric) {
             return NextResponse.json(
@@ -52,7 +54,6 @@ export async function GET(request: NextRequest) {
             'bitErrorRate',
             'bitsSent',
             'bitsReceived',
-            'mode',
             'power'
         ];
 
@@ -62,16 +63,35 @@ export async function GET(request: NextRequest) {
         ]
         
         // Determine which collection to use based on the metric
-        //const collectionName = metric === 'temperature' ? 'CWRU' : 'Radio';
         const collectionName = validSignalMetrics.includes(metric) ? 'Radio' : 'CWRU';
         const collection = db.collection(collectionName);
             
-
         if (!validSignalMetrics.includes(metric) && !validWeatherMetrics.includes(metric)) {
             return NextResponse.json(
                 { error: `Invalid metric. Choose one of: ${validSignalMetrics.join(', ')} or ${validWeatherMetrics.join(', ')}` },
                 { status: 400 }
             );
+        }
+
+        // Build query with date range if provided
+        const query: any = {};
+        if (dateFrom || dateTo) {
+            query.timestamp = {};
+            if (dateFrom) {
+                query.timestamp.$gte = new Date(dateFrom);
+            }
+            if (dateTo) {
+                query.timestamp.$lte = new Date(dateTo);
+            }
+        }
+        // If no date range is provided, default to the last 24 hours
+        if (!dateFrom && !dateTo) {
+            const now = new Date();
+            const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            query.timestamp = {
+                $gte: twentyFourHoursAgo,
+                $lte: now
+            };
         }
 
         // Query the data - get timestamp and the requested metric
@@ -82,7 +102,7 @@ export async function GET(request: NextRequest) {
         projection[metric] = 1;
 
         const data = await collection
-            .find({})
+            .find(query)
             .project(projection)
             .sort({ timestamp: 1 })
             .toArray();

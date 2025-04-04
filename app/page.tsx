@@ -64,15 +64,18 @@ const TemperatureChart = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        const dateFrom = $('#from').value || '';
+        const dateTo = $('#to').value || '';
+        
         // Fetch bit error rate data
-        const berPromise = fetch('/api/get-chart?metric=bitErrorRate')
+        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch BER data');
                 return response.json();
             });
         
         // Fetch temperature data
-        const tempPromise = fetch('/api/get-chart?metric=temperature')
+        const tempPromise = fetch(`/api/get-chart?metric=temperature&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch temperature data');
                 return response.json();
@@ -160,14 +163,14 @@ const HumidityChart = () => {
 
     useEffect(() => {
         // Fetch bit error rate data
-        const berPromise = fetch('/api/get-chart?metric=bitErrorRate')
+        const berPromise = fetch('/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}')
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch BER data');
                 return response.json();
             });
         
         // Fetch humidity data
-        const humidityPromise = fetch('/api/get-chart?metric=relativeHumidity')
+        const humidityPromise = fetch('/api/get-chart?metric=relativeHumidity&dateFrom=${dateFrom}&dateTo=${dateTo}')
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch humidity data');
                 return response.json();
@@ -176,8 +179,6 @@ const HumidityChart = () => {
         // Wait for both requests to complete
         Promise.all([berPromise, humidityPromise])
             .then(([berData, humidityData]) => {
-                // Find max BER value for scaling
-                const berMax = Math.max(...berData.y);
                 
                 setChartData({
                     labels: berData.x, // both datasets have the same x values
@@ -209,8 +210,8 @@ const HumidityChart = () => {
         responsive: true,
         scales: {
             'y-humidity': {
-                type: 'linear',
-                position: 'left',
+                type: 'linear' as const,
+                position: 'left' as const,
                 beginAtZero: true,
                 title: {
                     display: true,
@@ -221,8 +222,8 @@ const HumidityChart = () => {
                 }
             },
             'y-ber': {
-                type: 'linear',
-                position: 'right',
+                type: 'linear' as const,
+                position: 'right' as const,
                 min: 0,
                 title: {
                     display: true,
@@ -240,7 +241,6 @@ const HumidityChart = () => {
             }
         }
     };
-
     return <Line data={chartData} options={options} />;
 };
 
@@ -331,7 +331,7 @@ export default function Home() {
             <div className="col-sm-2 setToBottom">
                 <div className ="dates">
                     <h4>From</h4>
-                    <input type="date" className="dateInput"></input> to <input type="date" className="dateInput"></input>
+                    <input type="date" id="from" className="dateInput"></input> to <input type="date" id="to" className="dateInput"></input>
                 </div>
                 <hr />
                 <div className="sideLink">
