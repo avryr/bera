@@ -15,6 +15,7 @@ def uploadToDatabase(collectionName, valuesDict):
         "barometricPressure": valuesDict.get("barometricPressure", {}).get("value", None),
         "relativeHumidity": valuesDict.get("relativeHumidity", {}).get("value", None),
         "dewpoint": valuesDict.get("dewpoint", {}).get("value", None),
+        "precipitation": valuesDict.get("precipitation", {}).get("value", None)
     }
         
     inserted_id = collection.insert_one(document).inserted_id
