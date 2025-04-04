@@ -81,7 +81,9 @@ def getWeatherDataFromDevice(token, deviceID):
         "interval": {"value": observations[0][17]*60, "units": "secs"},
         "rainAccumulationLastDay": {"value": observations[0][18], "units": "mm"},
         "nearcastRainAccumulation": {"value": observations[0][19], "units": "mm"},
-        "nearcastRainAccumulationLastDay": {"value": observations[0][20], "units": "mm"},
+        # If we want a different measurement of precipitation, just change this back to "nearcastRainAccumulationLastDay"
+        # and change the one you want to "precipitation"
+        "precipitation": {"value": observations[0][20], "units": "mm"}, #nearcastRainAccumulationLastDay
         "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"},
         "dewpoint": {"value": getDewpoint(observations[0][7], observations[0][8]), "units": "degC"}
     }
