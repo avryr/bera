@@ -1,0 +1,98 @@
+body{
+    background-color: #F4F4F4;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.pageTitle{
+    background-color: #352F43;
+    color: #FFFFFF;
+    padding: 0;
+    margin: 0;
+}
+.header{
+    background-color: #67597A;
+    height: 15vh;
+}
+.locationDisplay{
+    color: #352F43;
+    background-color: #F4F4F4;
+    border-radius: 10px;
+    font-size: clamp(40px, 5vw, 65px);
+    margin: 10px;
+    text-align: center;
+    max-height: 75%;
+    width: 50vw;
+    
+}
+.arrow{
+    color: #67597A;
+}
+button.btn.locationBtn{
+    background-color: #C4BAFF;
+    font-size: clamp(16px, 2svw, 23px);
+    padding: 10px;
+}
+button.btn.locationBtn:hover{
+    background-color: #c4baff9f;
+}
+.sidebar{
+    background-color: #E2DEF6;
+    height: 85vh;
+    padding: 10px;
+    color: #352F43;
+    position: sticky;
+}
+.checks{
+    margin-left: 10px;
+    font-size: 20px;
+}
+.form-check-input{
+    background-color: #352f4300!important;
+    border-color: #352F43!important;
+}
+.form-check-input:checked{
+    background-color: #352F43!important;
+    border-color: #352F43!important;
+}
+.form-check-input:checked:focus{
+    box-shadow: 0 0 5px #352F43!important;
+}
+
+.form-check-input:focus{
+    box-shadow: 0 0 5px #352F43!important;
+}
+.setToBottom{
+    position: fixed;
+    bottom: 0;
+}
+.sideLink{
+    padding-top: 0px;
+    padding-bottom:20px;
+    padding-left: 10px;
+}
+
+a{
+    color: #968ABD!important;
+}
+.logo{
+    height: 10vh;
+    position: sticky;
+    position: stick
+}
+.charts{
+    color: #352F43;
+    padding-top: 10px;
+    padding-left: 20px;
+}
+#precipChart, #tempChart, #humidChart{
+    display: none;
+}
+.dates{
+    color: #352F43;
+}
+.dateInput{
+    color: #352F43;
+    background-color: #F4F4F4;
+    margin-left: 3px;
+    font-size: 15px;
+}

@@ -67,4 +67,3 @@ def test_upload():
     clearCollection("CWRU")
     print(selectAllFromDatabase("CWRU"))
 
-test_upload()

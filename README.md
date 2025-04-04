@@ -6,4 +6,6 @@ A platform which performs automated measurement of bit error rates at minimal tr
 The system will correlate error rates against atmospheric moisture, temperature, precipitation amount and other meteorological data along the path. Since NASA Glenn is located within the meteorological prediction range of an FAA Class B airport, the National Weather Service provides excellent and publicly available weather for the specific area of interest.
 Three key systems/services constitute this platform: weather collection, radio transmission/reception, and the web interface which presents the data and allows for its analysis. These three services are connected via an established API, and data is stored in a database.
 
-
+1) navigate to src folder in command prompt
+2) `npm install` if needed
+3) `npm run dev`

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>BERA Homepage</title>
+    <link rel="stylesheet" href="src\main.css">   
+    <script src="src\app.js" type="module"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <!-- Logo -->
+            <div class="col-sm-2 pageTitle d-flex justify-content-center align-items-center">
+                <img src="\bera.svg" class="logo " alt="BERA Logo">
+            </div>
+            <!-- Location Display -->
+            <div class="col-sm-10">
+                <div class="row header">
+                    <div class="col-sm-9 d-flex justify-content-center align-items-center" style="min-height:100%">
+                        <div class="panel panel-body locationDisplay">
+                            <span id="loc1"></span> <i class="arrow fa-solid fa-arrow-right"></i> <span id="loc2"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-1"></div>
+                    <!-- Change Location Button -->
+                    <div class="col-sm-2">
+                        <div class="d-flex justify-content-center align-items-center" style="min-height: 100%;">
+                            <button type="button" class="btn locationBtn">Change Location</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Document -->
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-sm-2 sidebar">
+                <h1>Data</h1>
+                <hr>
+                <!-- Checklist -->
+                <div class="checks">
+                    <div class="form-check" onchange="toggleChart('#precipChart')">
+                        <input class="form-check-input" type="checkbox" id="precip">
+                        <label class="form-check-label" for="precip">
+                            Precipitation
+                        </label>
+                    </div>
+                    <p></p>
+                    <div class="form-check" onchange="toggleChart('#tempChart')">
+                        <input class="form-check-input" type="checkbox" id="temp">
+                        <label class="form-check-label" for="temp">
+                            Temperature
+                        </label>
+                    </div>
+                    <p></p>
+                    <div class="form-check" onchange="toggleChart('#humidChart')">
+                        <input class="form-check-input" type="checkbox" id="humid">
+                        <label class="form-check-label" for="humid">
+                            Humidity
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- Sidebar Footer -->
+            <div class="col-sm-2 setToBottom">
+                <div class="dates">
+                    <h4>From</h4>
+                    <input type="date" class="dateInput"> to <input type="date" class="dateInput">
+                </div>
+                <hr>
+                <div class="sideLink">
+                    <a href="https://github.com/avryr/bera">Link to our GitHub...</a>
+                </div>
+            </div>
+            <!-- Charts -->
+            <div class="col-sm-10 charts">
+                <!-- Precipitation -->
+                <div id="precipChart">
+                    <h2>Precipitation</h2>
+                    <hr>
+                </div>
+                <!-- Temperature -->
+                <div id="tempChart">
+                    <h2>Temperature</h2>
+                    <hr>
+                </div>
+                <!-- Humidity -->
+                <div id="humidChart">
+                    <h2>Humidity</h2>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

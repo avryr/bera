@@ -48,6 +48,17 @@ def getWeatherDataFromDevice(token, deviceID):
     def getPrecipitationAnalysisType(measurement):
         typeList = ["none", "rain", "hail", "rain + hail"]
         return typeList[measurement]
+    
+    def getDewpoint(temperature, humidity):
+        # https://iridl.ldeo.columbia.edu/dochelp/QA/Basic/dewpoint.html 
+        # Simpler calculation that gives an approximation of dew point temperature if you know the observed temperature
+        # and relative humidity, proposed by Mark G. Lawrence in the Bulletin of the American Meteorological Society:
+        # Td = T - ((100 - RH)/5.)
+        # where Td is dew point temperature (in degrees Celsius), T is observed temperature (in degrees Celsius), and 
+        # RH is relative humidity (in percent). This relationship is  accurate for relative humidity values above 50%.
+        return temperature - ((100 - humidity)/5)
+
+
 
     data = {
         "timestamp": {"value": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))), "units": "[timestamp]"},
@@ -72,8 +83,10 @@ def getWeatherDataFromDevice(token, deviceID):
         "nearcastRainAccumulation": {"value": observations[0][19], "units": "mm"},
         "nearcastRainAccumulationLastDay": {"value": observations[0][20], "units": "mm"},
         "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"},
-        "dewpoint": {"value": None, "units": None}
+        "dewpoint": {"value": getDewpoint(observations[0][7], observations[0][8]), "units": "degC"}
     }
+
+
     return data
 
 #________________________________________________________________________
