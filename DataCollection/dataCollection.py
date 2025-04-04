@@ -5,6 +5,7 @@ import database_connection
 
 #If you want to make your own project, all you need to do is change the values in this script
 #If you want to use a different MongoDB database, make a different getConnectionString.py script.
+#If you want to use a different database altogether, make a new database_connection.py script
 
 def Start():
 
