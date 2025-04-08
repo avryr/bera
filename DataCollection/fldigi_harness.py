@@ -23,7 +23,7 @@ TX_DELAY = 2            # Add a delay between send and listen to allow RX machin
 SQUELCH = 25             # Squelch Level
 
 # HACK: put these here to make them global, just to avoid passing them from the thread
-ber = 0.0
+ber = 1.0
 all_expected_data=b''
 all_received_data=b''
 
@@ -273,6 +273,7 @@ def main():
 def makeMeasurement(is_sender, timestamp, ip):
     """Runs the experiment in headless mode without relying on command line arguments."""
     ip_address = ip
+    global ber
     # Initialize the fldigi client
     try:
         # if receive, port 7363
