@@ -1,7 +1,8 @@
-import schedule
+import schedule, time
 import TempestWeatherData
 import NationalWeatherData
 import database_connection
+import fldigi_harness
 from datetime import datetime, timezone
 
 
@@ -15,8 +16,12 @@ def Start():
     database_connection.uploadToDatabase("CWRU", CWRUData, timestamp)
     database_connection.uploadToDatabase("NASA", NASAData, timestamp)
     # ADD DATA FROM FLDIGI NOW!!!
-    fldigi_harness.makeMeasurement(true, timestamp, ip_address)
+    fldigi_harness.makeMeasurement(True, timestamp, ip_address)
 
 
-Start()
-# schedule.every(30).minutes.do(Start)
+#Start()
+schedule.every(30).minutes.do(Start)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
