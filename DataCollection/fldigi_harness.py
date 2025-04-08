@@ -305,29 +305,30 @@ def makeMeasurement(is_sender, timestamp, ip):
 
     logger.info("Test complete.")
 
-    # Connect to MongoDB and save the results
-    try:
-        # MongoDB connection details
-        mongo_client = MongoClient(os.environ["MONGODB_URI"])
-        db = mongo_client['Bera']
-        collection = db['Radio']
-                
-        # Create document with test results
-        result_doc = {
-            'timestamp': timestamp,
-            'mode': MODE,
-            'bitsPerPacket': PACKET_SIZE,
-            'numPackets': NUM_PACKETS,
-            'bitErrorRate': ber,
-            'expectedData': all_expected_data.decode('utf-8', errors='ignore'),
-            'receivedData': all_received_data.decode('utf-8', errors='ignore')
-        }
-                
-        # Insert the document into the collection
-        result = collection.insert_one(result_doc)
-        logger.info(f"Results saved to MongoDB with ID: {result.inserted_id}")
-    except Exception as e:
-        logger.error(f"Failed to save results to MongoDB: {e}")
+    # Receiver should connect to MongoDB and save the results
+    if not is_sender:
+        try:
+            # MongoDB connection details
+            mongo_client = MongoClient(os.environ["MONGODB_URI"])
+            db = mongo_client['Bera']
+            collection = db['Radio']
+                    
+            # Create document with test results
+            result_doc = {
+                'timestamp': timestamp,
+                'mode': MODE,
+                'bitsPerPacket': PACKET_SIZE,
+                'numPackets': NUM_PACKETS,
+                'bitErrorRate': ber,
+                'expectedData': all_expected_data.decode('utf-8', errors='ignore'),
+                'receivedData': all_received_data.decode('utf-8', errors='ignore')
+            }
+                    
+            # Insert the document into the collection
+            result = collection.insert_one(result_doc)
+            logger.info(f"Results saved to MongoDB with ID: {result.inserted_id}")
+        except Exception as e:
+            logger.error(f"Failed to save results to MongoDB: {e}")
 
 # Example usage of headless_mode function
 # headless_mode(True, datetime.now(tz=pytz.utc))
