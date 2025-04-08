@@ -2,6 +2,7 @@ import schedule
 import TempestWeatherData
 import NationalWeatherData
 import database_connection
+from datetime import datetime, timezone
 
 
 def Start():
@@ -16,4 +17,6 @@ def Start():
     # ADD DATA FROM FLDIGI NOW!!!
     fldigi_harness.makeMeasurement(true, timestamp, ip_address)
 
-schedule.every(30).minutes.do(Start)
+
+Start()
+# schedule.every(30).minutes.do(Start)

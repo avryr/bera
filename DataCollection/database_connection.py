@@ -1,9 +1,10 @@
 from pymongo import MongoClient
 from datetime import datetime, timezone
-import getConnectionString
+import os
 
 def uploadToDatabase(collectionName, valuesDict, timestamp):
-    CONNECTION_STRING, database = getConnectionString.getConnectionString()
+    CONNECTION_STRING = os.environ["MONGODB_URI"]
+    database = os.environ["DATABASE_NAME"]
 
     client = MongoClient(CONNECTION_STRING) 
     db = client[database]  # Access the database
