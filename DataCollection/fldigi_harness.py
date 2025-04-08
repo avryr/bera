@@ -3,7 +3,7 @@ import random
 import time
 import socket
 import threading
-import sys
+import sys, os
 import select
 import logging
 import string
@@ -21,6 +21,11 @@ PACKET_SIZE = 100       # Number of bits per packet
 NUM_PACKETS = 1        # Number of packets to send for testing
 TX_DELAY = 2            # Add a delay between send and listen to allow RX machine to catch up
 SQUELCH = 25             # Squelch Level
+
+# HACK: put these here to make them global, just to avoid passing them from the thread
+ber = 0.0
+all_expected_data=b''
+all_received_data=b''
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO,  # Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -272,7 +277,7 @@ def makeMeasurement(is_sender, timestamp, ip):
     try:
         # if receive, port 7363
         # if send, port 7362
-        fldigi = pyfldigi.Client('localhost', 7363 if is_sender else 7362)
+        fldigi = pyfldigi.Client('localhost', 7362)
         # set tx timeout to 9 seconds
         fldigi.txmonitor.xmit_timeout = 9
         # turn off AFC
@@ -302,7 +307,7 @@ def makeMeasurement(is_sender, timestamp, ip):
     # Connect to MongoDB and save the results
     try:
         # MongoDB connection details
-        mongo_client = MongoClient(getConnectionString.getConnectionString())
+        mongo_client = MongoClient(os.environ["MONGODB_URI"])
         db = mongo_client['Bera']
         collection = db['Radio']
                 
@@ -313,8 +318,8 @@ def makeMeasurement(is_sender, timestamp, ip):
             'bitsPerPacket': PACKET_SIZE,
             'numPackets': NUM_PACKETS,
             'bitErrorRate': ber,
-            'bitsSent': all_expected_data.decode('utf-8', errors='ignore'),
-            'bitsReceived': all_received_data.decode('utf-8', errors='ignore')
+            'expectedData': all_expected_data.decode('utf-8', errors='ignore'),
+            'receivedData': all_received_data.decode('utf-8', errors='ignore')
         }
                 
         # Insert the document into the collection
