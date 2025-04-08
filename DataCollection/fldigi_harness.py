@@ -188,30 +188,6 @@ def handle_client_connection(conn, fldigi_client, is_sender):
             logger.info(f"Expected data: {all_expected_data.decode('utf-8', errors='ignore')}")
             logger.info(f"Received data: {all_received_data.decode('utf-8', errors='ignore')}")
             logger.info(f"Overall Bit Error Rate: {ber:.4f}")
-            # Connect to MongoDB and save the results
-            try:
-                # MongoDB connection details
-                mongo_client = MongoClient('mongodb+srv://data-inputter:nxMT0g8RdMLmsm1P@bera.1e3b4.mongodb.net')
-                db = mongo_client['Bera']
-                collection = db['Radio']
-                
-                # Create document with test results
-                result_doc = {
-                    'timestamp': datetime.now(tz=pytz.utc),
-                    'mode': MODE,
-                    'bitsPerPacket': PACKET_SIZE,
-                    'numPackets': NUM_PACKETS,
-                    'bitErrorRate': ber,
-                    'bitsSent': all_expected_data.decode('utf-8', errors='ignore'),
-                    'bitsReceived': all_received_data.decode('utf-8', errors='ignore')
-                }
-                
-                # Insert the document into the collection
-                result = collection.insert_one(result_doc)
-                logger.info(f"Results saved to MongoDB with ID: {result.inserted_id}")
-            except Exception as e:
-                logger.error(f"Failed to save results to MongoDB: {e}")
-
     except (BrokenPipeError, ConnectionResetError) as e:
         logger.error(f"Connection error: {e}")
     finally:
@@ -247,7 +223,7 @@ def connect_to_server(fldigi_client, is_sender):
 
 
 def main():
-    """Main function to initialize fldigi and start the communication."""
+    """Default main function to initialize fldigi and start the communication."""
 
     if len(sys.argv) < 2 or sys.argv[1] not in ('send', 'receive'):
         print("Usage: python " + sys.argv[0] + " <send|receive>")
@@ -289,5 +265,65 @@ def main():
     logger.info("Test complete.")
 
 
+def makeMeasurement(is_sender, timestamp):
+    """Runs the experiment in headless mode without relying on command line arguments."""
+    
+    # Initialize the fldigi client
+    try:
+        # if receive, port 7363
+        # if send, port 7362
+        fldigi = pyfldigi.Client('localhost', 7363 if is_sender else 7362)
+        # set tx timeout to 9 seconds
+        fldigi.txmonitor.xmit_timeout = 9
+        # turn off AFC
+        fldigi.main.afc = False
+    except ConnectionRefusedError:
+        logger.critical("Connection refused. Ensure fldigi is running and connected.")
+        sys.exit(1)
+    fldigi.modem.name = MODE
+    fldigi.modem.carrier = CARRIER_FREQ
+    fldigi.main.squelch_level = SQUELCH
+    # Clear the receive and send windows
+    fldigi.text.clear_rx()
+    fldigi.text.clear_tx()
+
+    # Start server or connect to server based on the is_sender parameter
+    if is_sender:
+        thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender))
+        thread.start()
+    else:
+        thread = threading.Thread(target=start_server, args=(fldigi, is_sender))
+        thread.start()
+
+    thread.join() # Wait for send/receive to complete
+
+    logger.info("Test complete.")
+
+    # Connect to MongoDB and save the results
+    try:
+        # MongoDB connection details
+        mongo_client = MongoClient(getConnectionString.getConnectionString())
+        db = mongo_client['Bera']
+        collection = db['Radio']
+                
+        # Create document with test results
+        result_doc = {
+            'timestamp': datetime.now(tz=pytz.utc),
+            'mode': MODE,
+            'bitsPerPacket': PACKET_SIZE,
+            'numPackets': NUM_PACKETS,
+            'bitErrorRate': ber,
+            'bitsSent': all_expected_data.decode('utf-8', errors='ignore'),
+            'bitsReceived': all_received_data.decode('utf-8', errors='ignore')
+        }
+                
+        # Insert the document into the collection
+        result = collection.insert_one(result_doc)
+        logger.info(f"Results saved to MongoDB with ID: {result.inserted_id}")
+    except Exception as e:
+        logger.error(f"Failed to save results to MongoDB: {e}")
+
+# Example usage of headless_mode function
+# headless_mode(True, datetime.now(tz=pytz.utc))
 if __name__ == "__main__":
     main()
