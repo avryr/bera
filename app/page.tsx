@@ -47,7 +47,8 @@ function TemperatureChart({dateFrom, dateTo}) {
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
-                tension: 0.1
+                tension: 0.1,
+                yAxisID: 'y-ber'
             },
             {
                 label: 'Temperature',
@@ -56,7 +57,8 @@ function TemperatureChart({dateFrom, dateTo}) {
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1,
-                tension: 0.1
+                tension: 0.1,
+                yAxisID: 'y-temperature'
             }
         ]
     });
@@ -65,6 +67,8 @@ function TemperatureChart({dateFrom, dateTo}) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        const dateFrom = $('#from').val() || '';
+        const dateTo = $('#to').val() || '';
         
         // Fetch bit error rate data
         const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
@@ -111,11 +115,29 @@ function TemperatureChart({dateFrom, dateTo}) {
     const options = {
         responsive: true,
         scales: {
-            y: {
+            'y-temperature': {
+                type: 'linear' as const,
+                position: 'left' as const,
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Values'
+                    text: 'Temperature (°C)'
+                },
+                grid: {
+                    drawOnChartArea: true
+                }
+            },
+            'y-ber': {
+                type: 'linear' as const,
+                position: 'right' as const,
+                min: 0,
+                max: 1,
+                title: {
+                    display: true,
+                    text: 'Bit Error Rate (%)'
+                },
+                grid: {
+                    drawOnChartArea: false
                 }
             },
             x: {
@@ -162,6 +184,10 @@ function HumidityChart({dateFrom, dateTo}) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+
+        const dateFrom = $('#from').val() || '';
+        const dateTo = $('#to').val() || '';
+
         // Fetch bit error rate data
         const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
@@ -225,6 +251,7 @@ function HumidityChart({dateFrom, dateTo}) {
                 type: 'linear' as const,
                 position: 'right' as const,
                 min: 0,
+                max: 1,
                 title: {
                     display: true,
                     text: 'Bit Error Rate (normalized)'
