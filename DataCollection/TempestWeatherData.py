@@ -69,7 +69,7 @@ def getWeatherDataFromDevice(token, deviceID):
         "intervalWindSampling": {"value": observations[0][5], "units": "secs"},
         "barometricPressure": {"value": mbTOpa(observations[0][6]), "units": "Pa"},
         "temperature": {"value": observations[0][7], "units": "degC"},
-        "relativeHumidity": {"value": observations[0][8], "units": "%"},
+        "relativeHumidity": {"value": float(observations[0][8]), "units": "%"},
         "illuminance": {"value": observations[0][9], "units": "lux"},
         "uv": {"value": observations[0][10], "units": "index"},
         "solarRadiation": {"value": observations[0][11], "units": "W/m²"},

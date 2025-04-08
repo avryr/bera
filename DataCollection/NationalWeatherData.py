@@ -27,7 +27,7 @@ def NationalWeatherData():
             "temperature": forecastKCLE['temperature']['value'],
             "dewpoint": forecastKCLE['dewpoint']['value'],
             "barometricPressure": forecastKCLE['barometricPressure']['value'],
-            "relativeHumidity": forecastKCLE['relativeHumidity']['value'],
+            "relativeHumidity": float(forecastKCLE['relativeHumidity']['value']),
             "precipitation": forecastKCLE['precipitationLast6Hours']['value']
         },
         "KBKL": {
@@ -35,7 +35,7 @@ def NationalWeatherData():
             "temperature": forecastKBKL['temperature']['value'],
             "dewpoint": forecastKBKL['dewpoint']['value'],
             "barometricPressure": forecastKBKL['barometricPressure']['value'],
-            "relativeHumidity": forecastKBKL['relativeHumidity']['value'],
+            "relativeHumidity": float(forecastKBKL['relativeHumidity']['value']),
             "precipitation": forecastKBKL['precipitationLast6Hours']['value']
         }
     }
