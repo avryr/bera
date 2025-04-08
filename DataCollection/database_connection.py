@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from datetime import datetime, timezone
 import getConnectionString
 
-def uploadToDatabase(collectionName, valuesDict):
+def uploadToDatabase(collectionName, valuesDict, timestamp):
     CONNECTION_STRING, database = getConnectionString.getConnectionString()
 
     client = MongoClient(CONNECTION_STRING) 
@@ -10,7 +10,7 @@ def uploadToDatabase(collectionName, valuesDict):
     collection = db[collectionName]  # Access the collection
 
     document = {
-        "timestamp": valuesDict.get("timestamp", {}).get("value", None),
+        "timestamp": timestamp,
         "temperature": valuesDict.get("temperature", {}).get("value", None),
         "barometricPressure": valuesDict.get("barometricPressure", {}).get("value", None),
         "relativeHumidity": valuesDict.get("relativeHumidity", {}).get("value", None),

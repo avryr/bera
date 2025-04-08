@@ -308,7 +308,7 @@ def makeMeasurement(is_sender, timestamp, ip):
                 
         # Create document with test results
         result_doc = {
-            'timestamp': datetime.now(tz=pytz.utc),
+            'timestamp': timestamp,
             'mode': MODE,
             'bitsPerPacket': PACKET_SIZE,
             'numPackets': NUM_PACKETS,

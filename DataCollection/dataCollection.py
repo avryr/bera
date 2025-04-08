@@ -11,8 +11,8 @@ def Start():
     CWRUData = TempestWeatherData.TempestWeatherData('bd78ca30-46d4-4407-b4c0-035bc8b045d7')
     NASAData = NationalWeatherData.NationalWeatherData()
 
-    database_connection.uploadToDatabase("CWRU", CWRUData)
-    database_connection.uploadToDatabase("NASA", NASAData)
+    database_connection.uploadToDatabase("CWRU", CWRUData, timestamp)
+    database_connection.uploadToDatabase("NASA", NASAData, timestamp)
     # ADD DATA FROM FLDIGI NOW!!!
     fldigi_harness.makeMeasurement(true, timestamp, ip_address)
 
