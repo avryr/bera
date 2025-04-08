@@ -14,7 +14,7 @@ import pytz
 
 # Configuration - ADJUST THESE AS NEEDED
 ip_address = "localhost" # IP of remote host, most likely Tailscale. Default to localhost for testing.
-PORT = 12345            # Port for internet communication
+PORT = 12346            # Port for internet communication
 MODE = "QPSK250"          # Modem mode (e.g., BPSK31, BPSK63, RTTY)
 CARRIER_FREQ = 1500     # Audio carrier frequency (Hz)
 PACKET_SIZE = 100       # Number of bits per packet
