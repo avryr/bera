@@ -13,7 +13,7 @@ import pytz
 
 
 # Configuration - ADJUST THESE AS NEEDED
-OTHER_HOST = 'localhost'  # Replace with the IP address of the other machine. Replace with Tailscale IP for multi-machine testing
+ip_address = "localhost" # IP of remote host, most likely Tailscale. Default to localhost for testing.
 PORT = 12345            # Port for internet communication
 MODE = "QPSK250"          # Modem mode (e.g., BPSK31, BPSK63, RTTY)
 CARRIER_FREQ = 1500     # Audio carrier frequency (Hz)
@@ -208,15 +208,15 @@ def start_server(fldigi_client, is_sender):
     handle_client_connection(conn, fldigi_client, is_sender)
     server_socket.close()
 
-def connect_to_server(fldigi_client, is_sender):
+def connect_to_server(fldigi_client, is_sender, ip_address):
     """Connects to the server."""
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        client_socket.connect((OTHER_HOST, PORT))
-        logger.info(f"Connected to {OTHER_HOST}:{PORT}")
+        client_socket.connect((ip_address, PORT))
+        logger.info(f"Connected to {ip_address}:{PORT}")
         handle_client_connection(client_socket, fldigi_client, is_sender)
     except ConnectionRefusedError:
-        logger.critical(f"Connection refused. Ensure the other instance is running and listening as a server on {OTHER_HOST}:{PORT}")
+        logger.critical(f"Connection refused. Ensure the other instance is running and listening as a server on {ip_address}:{PORT}")
         sys.exit(1)  # Exit the program if connection fails
     finally:
         client_socket.close()
@@ -254,10 +254,10 @@ def main():
     if is_sender:
         # Give the receiver a chance to start up
         time.sleep(2)
-        thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender))
+        thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender, ip_address))
         thread.start()
     else:
-        thread = threading.Thread(target=start_server, args=(fldigi, is_sender))
+        thread = threading.Thread(target=start_server, args=(fldigi, is_sender, ip_address))
         thread.start()
 
     thread.join() # Wait for send/receive to complete
@@ -265,9 +265,9 @@ def main():
     logger.info("Test complete.")
 
 
-def makeMeasurement(is_sender, timestamp):
+def makeMeasurement(is_sender, timestamp, ip):
     """Runs the experiment in headless mode without relying on command line arguments."""
-    
+    ip_address = ip
     # Initialize the fldigi client
     try:
         # if receive, port 7363
@@ -289,10 +289,10 @@ def makeMeasurement(is_sender, timestamp):
 
     # Start server or connect to server based on the is_sender parameter
     if is_sender:
-        thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender))
+        thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender, ip_address))
         thread.start()
     else:
-        thread = threading.Thread(target=start_server, args=(fldigi, is_sender))
+        thread = threading.Thread(target=start_server, args=(fldigi, is_sender, ip_address))
         thread.start()
 
     thread.join() # Wait for send/receive to complete
