@@ -24,7 +24,8 @@ def uploadToDatabase(collectionName, valuesDict, timestamp):
     return inserted_id
     
 def selectAllFromDatabase(collectionName):
-    CONNECTION_STRING, database = getConnectionString.getConnectionString()
+    CONNECTION_STRING = os.environ["MONGODB_URI"]
+    database = os.environ["DATABASE_NAME"]
     
     client = MongoClient(CONNECTION_STRING) 
     db = client[database]  # Access the database
@@ -35,7 +36,8 @@ def selectAllFromDatabase(collectionName):
     return docs
 
 def clearCollection(collectionName):
-    CONNECTION_STRING, database = getConnectionString.getConnectionString()
+    CONNECTION_STRING = os.environ["MONGODB_URI"]
+    database = os.environ["DATABASE_NAME"]
 
     client = MongoClient(CONNECTION_STRING)
     db = client[database]  # Access the database
@@ -45,7 +47,8 @@ def clearCollection(collectionName):
     client.close()
 
 def test_connection():
-    CONNECTION_STRING, database = getConnectionString.getConnectionString()
+    CONNECTION_STRING = os.environ["MONGODB_URI"]
+    database = os.environ["DATABASE_NAME"]
     
     try:
         client = MongoClient(CONNECTION_STRING)
