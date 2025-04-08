@@ -262,7 +262,7 @@ def main():
         thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender, ip_address))
         thread.start()
     else:
-        thread = threading.Thread(target=start_server, args=(fldigi, is_sender, ip_address))
+        thread = threading.Thread(target=start_server, args=(fldigi, is_sender))
         thread.start()
 
     thread.join() # Wait for send/receive to complete
@@ -297,7 +297,7 @@ def makeMeasurement(is_sender, timestamp, ip):
         thread = threading.Thread(target=connect_to_server, args=(fldigi, is_sender, ip_address))
         thread.start()
     else:
-        thread = threading.Thread(target=start_server, args=(fldigi, is_sender, ip_address))
+        thread = threading.Thread(target=start_server, args=(fldigi, is_sender))
         thread.start()
 
     thread.join() # Wait for send/receive to complete
