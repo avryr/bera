@@ -8,7 +8,6 @@ async function connectToDatabase() {
     if (cachedClient) {
         return cachedClient;
     }
-
     const uri = process.env.MONGODB_URI; // stored in Vercel, not the git repo this time.
     
     if (!uri) {

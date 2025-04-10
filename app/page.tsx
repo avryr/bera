@@ -8,9 +8,10 @@ import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 
-//default locations for top bar
+//default input values
 const defaultLoc1 = 'W8EDU';
 const defaultLoc2 = 'NA8SA';
+
 //funcs
 function changeLocs(loc1 : string, loc2 : string) {
     // Set the text of the location spans
@@ -35,7 +36,7 @@ function useInitialization() {
  Chart.register(...registerables);
 
 // Temperature chart component
-const TemperatureChart = () => {
+function TemperatureChart({dateFrom, dateTo}) {
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -64,8 +65,6 @@ const TemperatureChart = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const dateFrom = $('#from').value || '';
-        const dateTo = $('#to').value || '';
         
         // Fetch bit error rate data
         const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
@@ -131,7 +130,8 @@ const TemperatureChart = () => {
     return <Line data={chartData} options={options} />;
 };
 
-const HumidityChart = () => {
+//Humidity chart component
+function HumidityChart({dateFrom, dateTo}) {
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -163,14 +163,14 @@ const HumidityChart = () => {
 
     useEffect(() => {
         // Fetch bit error rate data
-        const berPromise = fetch('/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}')
+        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch BER data');
                 return response.json();
             });
         
         // Fetch humidity data
-        const humidityPromise = fetch('/api/get-chart?metric=relativeHumidity&dateFrom=${dateFrom}&dateTo=${dateTo}')
+        const humidityPromise = fetch(`/api/get-chart?metric=relativeHumidity&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch humidity data');
                 return response.json();
@@ -247,6 +247,23 @@ const HumidityChart = () => {
 
 export default function Home() {
   useInitialization(); // document.ready replacement
+  const defaultDateFrom = "2025-04-07";
+  const defaultDateTo = "2025-04-10";
+
+  const [dateFrom, setDateFrom] = useState(defaultDateFrom);
+  const [dateTo, setDateTo] = useState(defaultDateTo);
+  const [dateRender, setDateRender] = useState(true);
+
+  function handleDateChange(event){
+    if(event.target.id == 'from'){
+        setDateFrom(event.target.value);
+    }else{
+        setDateTo(event.target.value);
+    }
+    setDateRender(false)
+    setTimeout(() => setDateRender(true), 1);
+  }
+  
 
   return (
     <div className="container-fluid">
@@ -331,7 +348,7 @@ export default function Home() {
             <div className="col-sm-2 setToBottom">
                 <div className ="dates">
                     <h4>From</h4>
-                    <input type="date" id="from" className="dateInput"></input> to <input type="date" id="to" className="dateInput"></input>
+                    <input type="date" id="from" className="dateInput" value={dateFrom} onChange={handleDateChange}></input> to <input type="date" id="to" className="dateInput"value={dateTo} onChange={handleDateChange}></input>
                 </div>
                 <hr />
                 <div className="sideLink">
@@ -350,7 +367,7 @@ export default function Home() {
                     <h2>Temperature</h2>
                     <hr />
                     <div className="chart-container" style={{ height: '400px' }}>
-                        <TemperatureChart />
+                        {dateRender && <TemperatureChart dateFrom={dateFrom} dateTo={dateTo}/>}
                     </div>
                 </div>
                 {/* Humidity */}
@@ -358,7 +375,7 @@ export default function Home() {
                     <h2>Humidity</h2>
                     <hr />
                     <div className="chart-container" style={{ height: '400px' }}>
-                        <HumidityChart />
+                        {dateRender && <HumidityChart dateFrom={dateFrom} dateTo={dateTo}/>}
                     </div>
                 </div>
             </div>
