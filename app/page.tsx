@@ -36,7 +36,7 @@ function useInitialization() {
  Chart.register(...registerables);
 
 // Temperature chart component
-function TemperatureChart({dateFrom, dateTo}) {
+function TemperatureChart({dateFrom, dateTo}: {dateFrom: string, dateTo: string}) {
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -67,8 +67,6 @@ function TemperatureChart({dateFrom, dateTo}) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const dateFrom = $('#from').val() || '';
-        const dateTo = $('#to').val() || '';
         
         // Fetch bit error rate data
         const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
@@ -153,7 +151,7 @@ function TemperatureChart({dateFrom, dateTo}) {
 };
 
 //Humidity chart component
-function HumidityChart({dateFrom, dateTo}) {
+function HumidityChart({dateFrom, dateTo}: {dateFrom: string, dateTo: string}) {
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -184,10 +182,6 @@ function HumidityChart({dateFrom, dateTo}) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-
-        const dateFrom = $('#from').val() || '';
-        const dateTo = $('#to').val() || '';
-
         // Fetch bit error rate data
         const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
             .then(response => {
@@ -281,7 +275,7 @@ export default function Home() {
   const [dateTo, setDateTo] = useState(defaultDateTo);
   const [dateRender, setDateRender] = useState(true);
 
-  function handleDateChange(event){
+  function handleDateChange(event : React.ChangeEvent<HTMLInputElement>) {
     if(event.target.id == 'from'){
         setDateFrom(event.target.value);
     }else{
