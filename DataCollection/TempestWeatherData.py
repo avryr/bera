@@ -75,7 +75,7 @@ def getWeatherDataFromDevice(token, deviceID):
         return temperature - ((100 - humidity)/5)
 
     #Storing all the data the outdoors Tempest modules collect in a better dictionary structure.
-    data = {
+    return {
         "timestamp": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))),
         "windLull": observations[0][1], #"units": "m/s"
         "windSpeed": observations[0][2], #"units": "m/s"
@@ -102,8 +102,6 @@ def getWeatherDataFromDevice(token, deviceID):
         "precipitationAnalysisType": getPrecipitationAnalysisType(observations[0][21]), #"units": "[timestamp]"
         "dewpoint": getDewpoint(observations[0][7], observations[0][8]) #"units": "degC"
     }
-
-    return data
 
 #________________________________________________________________________
 # If you just want to run this program by itself and get the Tempest data, you can do so.

@@ -18,7 +18,7 @@ def NationalWeatherData(airportCode):
         # extract only the data we want -- feel free to go to the link below for an example from the Cleveland
         # Hopkins Airport of how these docs are formatted and what data types there are:
         # "https://api.weather.gov/stations/KCLE/observations/latest"
-        weatherData = {
+        return {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
             "temperature": forecast.get("temperature", {}).get("value", None),
             "dewpoint": forecast.get("dewpoint", {}).get("value", None),
@@ -28,7 +28,7 @@ def NationalWeatherData(airportCode):
         }
     except: 
         #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
-        weatherData = {
+        return {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
             "temperature": None,
             "dewpoint": None,
@@ -36,6 +36,5 @@ def NationalWeatherData(airportCode):
             "relativeHumidity": None,
             "precipitation": 0.0
         }
-    return weatherData
-
+    
 #print(getWeatherData())
