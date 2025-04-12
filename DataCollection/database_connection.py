@@ -12,11 +12,11 @@ def uploadToDatabase(collectionName, valuesDict, timestamp):
 
     document = {
         "timestamp": timestamp,
-        "temperature": valuesDict.get("temperature", {}).get("value", None),
-        "barometricPressure": valuesDict.get("barometricPressure", {}).get("value", None),
-        "relativeHumidity": valuesDict.get("relativeHumidity", {}).get("value", None),
-        "dewpoint": valuesDict.get("dewpoint", {}).get("value", None),
-        "precipitation": valuesDict.get("precipitation", {}).get("value", None)
+        "temperature": valuesDict.get("temperature", None),
+        "barometricPressure": valuesDict.get("barometricPressure", None),
+        "relativeHumidity": valuesDict.get("relativeHumidity", None),
+        "dewpoint": valuesDict.get("dewpoint", None),
+        "precipitation": valuesDict.get("precipitation", None)
     }
         
     inserted_id = collection.insert_one(document).inserted_id
@@ -68,7 +68,3 @@ def test_upload():
         "dewpoint": {"value": 0.0},
     })
     
-    print(selectAllFromDatabase("CWRU"))
-    clearCollection("CWRU")
-    print(selectAllFromDatabase("CWRU"))
-
