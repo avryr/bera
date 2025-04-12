@@ -101,10 +101,10 @@ def test_connection():
 
 def test_upload():
     uploadToDatabase("CWRU", {
-        "timestamp": {"value": datetime.now(timezone.utc)},
-        "temperature": {"value": 0.0},
-        "barometricPressure": {"value": 0.0},
-        "relativeHumidity": {"value": 0.0},
-        "dewpoint": {"value": 0.0},
-    })
+        "timestamp": datetime.now(timezone.utc),
+        "temperature": 0.0,
+        "barometricPressure": 0.0,
+        "relativeHumidity": 0.0,
+        "dewpoint": 0.0,
+    }, datetime.now(timezone.utc))
     
