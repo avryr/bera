@@ -76,31 +76,31 @@ def getWeatherDataFromDevice(token, deviceID):
 
     #Storing all the data the outdoors Tempest modules collect in a better dictionary structure.
     data = {
-        "timestamp": {"value": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))), "units": "[timestamp]"},
-        "windLull": {"value": observations[0][1], "units": "m/s"},
-        "windSpeed": {"value": observations[0][2], "units": "m/s"},
-        "windGust": {"value": observations[0][3], "units": "m/s"},
-        "windDirection": {"value": observations[0][4], "units": "degrees"},
-        "intervalWindSampling": {"value": observations[0][5], "units": "secs"},
-        "barometricPressure": {"value": mbTOpa(observations[0][6]), "units": "Pa"},
-        "temperature": {"value": observations[0][7], "units": "degC"},
-        "relativeHumidity": {"value": float(observations[0][8]), "units": "%"},
-        "illuminance": {"value": observations[0][9], "units": "lux"},
-        "uv": {"value": observations[0][10], "units": "index"},
-        "solarRadiation": {"value": observations[0][11], "units": "W/m²"},
-        "rainAccumulationOverInterval": {"value": observations[0][12], "units": "mm"},
-        "precipitationType": {"value": getPrecipitationType(observations[0][13]), "units": "[type]"},
-        "lightningAverageDistance": {"value": observations[0][14], "units": "[timestamp]"},
-        "lightningStrikeCountOverInterval": {"value": observations[0][15], "units": "km"},
-        "battery": {"value": observations[0][16], "units": "V"},
-        "interval": {"value": observations[0][17]*60, "units": "secs"},
-        "rainAccumulationLastDay": {"value": observations[0][18], "units": "mm"},
-        "nearcastRainAccumulation": {"value": observations[0][19], "units": "mm"},
+        "timestamp": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))),
+        "windLull": observations[0][1], #"units": "m/s"
+        "windSpeed": observations[0][2], #"units": "m/s"
+        "windGust": observations[0][3], #"units": "m/s"
+        "windDirection": observations[0][4], #"units": "degrees"
+        "intervalWindSampling": observations[0][5], #"units": "secs"
+        "barometricPressure": mbTOpa(observations[0][6]), #"units": "Pa"
+        "temperature": observations[0][7], #"units": "degC"
+        "relativeHumidity": float(observations[0][8]), #"units": "%"
+        "illuminance": observations[0][9], #"units": "lux"
+        "uv": observations[0][10], #"units": "index"
+        "solarRadiation": observations[0][11], #"units": "W/m²"
+        "rainAccumulationOverInterval": observations[0][12], #"units": "mm"
+        "precipitationType": getPrecipitationType(observations[0][13]), #"units": "[type]"
+        "lightningAverageDistance": observations[0][14], #"units": "[timestamp]"
+        "lightningStrikeCountOverInterval": observations[0][15], #"units": "km"
+        "battery": observations[0][16], #"units": "V"
+        "interval": observations[0][17]*60, #"units": "secs"
+        "rainAccumulationLastDay": observations[0][18], #"units": "mm"
+        "nearcastRainAccumulation": observations[0][19], #"units": "mm"
         # If we want a different measurement of precipitation, just change this back to "nearcastRainAccumulationLastDay"
         # and change the one you want to "precipitation"
-        "precipitation": {"value": observations[0][20], "units": "mm"}, #nearcastRainAccumulationLastDay
-        "precipitationAnalysisType": {"value": getPrecipitationAnalysisType(observations[0][21]), "units": "[timestamp]"},
-        "dewpoint": {"value": getDewpoint(observations[0][7], observations[0][8]), "units": "degC"}
+        "precipitation": observations[0][20], "units": "mm" #nearcastRainAccumulationLastDay
+        "precipitationAnalysisType": getPrecipitationAnalysisType(observations[0][21]), #"units": "[timestamp]"
+        "dewpoint": getDewpoint(observations[0][7], observations[0][8]) #"units": "degC"
     }
 
     return data
