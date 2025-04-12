@@ -14,6 +14,10 @@ def NationalWeatherData(airportCode):
         response = requests.get(URL) 
         #get relevant data
         forecast = response.json()['properties']
+
+        # extract only the data we want -- feel free to go to the link below for an example from the Cleveland
+        # Hopkins Airport of how these docs are formatted and what data types there are:
+        # "https://api.weather.gov/stations/KCLE/observations/latest"
         weatherData = {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
             "temperature": forecast['temperature']['value'],
@@ -23,6 +27,7 @@ def NationalWeatherData(airportCode):
             "precipitation": forecast['precipitationLast6Hours']['value']
         }
     except: 
+        #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
         weatherData = {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
             "temperature": None,

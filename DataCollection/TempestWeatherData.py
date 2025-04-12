@@ -9,18 +9,29 @@ import requests #library that makes the calls to the API URL and the response ba
 import json
 from time import strftime, localtime
 
+# Overall function to execute code in sequential order
 def TempestWeatherData(token):
     deviceID = getDeviceIDFromToken(token)
     return getWeatherDataFromDevice(token, deviceID)
 
+# Each Tempest module has several different devices. These devices measure different things, and are categorized as
+# either "indoor" or "outdoor". The outdoor ones are the ones with the data we care about. We can't query the Tempest
+# module as a whole for some reason (believe me, I tried), but we can query each of the individual devices attached
+# to that module and have THEM send us their data. So this function gets all of the devices attached to a specific
+# access token. Note that all outdoor devices seem to collect the same data, so we can just save the first one.
+# If that ever changes, feel free to edit the code. 
 def getDeviceIDFromToken(token):
     URL = f"https://swd.weatherflow.com/swd/rest/stations?token={token}"
     response = requests.get(URL)
-    if (response.status_code != 200):
+    if (response.status_code != 200): #If you can't connect, you have a bad token
         raise Exception("Your token is invalid or expired.")
-    parsedData = json.loads(response.text)
-    deviceList = parsedData["stations"][0]['devices']
+    parsedData = json.loads(response.text) #parse the data provided by the Tempest devices
+    # The station list is buried in a bunch of nested dictionaries. Feel free to print(parsedData) if you want to 
+    # take a look at the whole nested structure.
+    deviceList = parsedData["stations"][0]['devices'] 
+    #find the first outdoor device by iterating through list
     device = next((d for d in deviceList if d["device_meta"]["environment"] == "outdoor"), None)
+    #return the list of all outdoor devices
     return device['device_id']
 
 
@@ -29,7 +40,11 @@ def getWeatherDataFromDevice(token, deviceID):
     response = requests.get(URL).text
     parsedData = json.loads(response)
     observations = parsedData['obs']
-    # for more obs info/structure, see link https://apidocs.tempestwx.com/reference/observation-record-format#tempest-observation
+
+    # for more observation info/structure, see link:
+    # https://apidocs.tempestwx.com/reference/observation-record-format#tempest-observation
+    #
+    # Indices to reference data:
     #0 timestamp, 1 wind lull (m/s), 2 wind average (m/s), 3 wind gust (m/s), 4 wind direction (degrees),
     #5 wind sample interval (seconds), 6 pressure (mb), 7 air temperature (°C), 8 relative humidity (%),
     #9 illuminance (lux), 10 uv (index), 11 solar radiation (W/m²), 12 rain accumulation in interval (mm),
@@ -38,6 +53,7 @@ def getWeatherDataFromDevice(token, deviceID):
     #17 reporting interval (minutes), 18 local day rain accumulation (mm), 19 Nearcast rain accumulation (mm),
     #20 local day Nearcast rain accumulation (mm), 21 precipitation analysis type
     
+    #Unit conversions
     def mbTOpa(measurement):
         return measurement*100
         
@@ -58,8 +74,7 @@ def getWeatherDataFromDevice(token, deviceID):
         # RH is relative humidity (in percent). This relationship is  accurate for relative humidity values above 50%.
         return temperature - ((100 - humidity)/5)
 
-
-
+    #Storing all the data the outdoors Tempest modules collect in a better dictionary structure.
     data = {
         "timestamp": {"value": datetime.fromisoformat(strftime('%Y-%m-%dT%H:%M:%S', localtime(observations[0][0]))), "units": "[timestamp]"},
         "windLull": {"value": observations[0][1], "units": "m/s"},
@@ -88,10 +103,10 @@ def getWeatherDataFromDevice(token, deviceID):
         "dewpoint": {"value": getDewpoint(observations[0][7], observations[0][8]), "units": "degC"}
     }
 
-
     return data
 
 #________________________________________________________________________
+# If you just want to run this program by itself and get the Tempest data, you can do so.
 def main():
     token = input("Please enter the tempest Auth Token: ")
     data = TempestWeatherData(token)
