@@ -24,7 +24,7 @@ def NationalWeatherData(airportCode):
             "dewpoint": forecast.get("dewpoint", {}).get("value", None),
             "barometricPressure": forecast.get("barometricPressure", {}).get("value", None),
             "relativeHumidity": forecast.get("relativeHumidity", {}).get("value", None),
-            "precipitation": forecast.get("precipitationLast6Hours", {}).get("value", None)
+            "precipitation": forecast.get("precipitationLast6Hours", {}).get("value", 0.0)
         }
     except: 
         #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
@@ -34,7 +34,7 @@ def NationalWeatherData(airportCode):
             "dewpoint": None,
             "barometricPressure": None,
             "relativeHumidity": None,
-            "precipitation": None
+            "precipitation": 0.0
         }
     return weatherData
 
