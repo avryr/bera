@@ -34,10 +34,10 @@ def uploadToDatabase(collectionName, valuesDict, timestamp):
     document = {
         "timestamp": timestamp,
         "temperature": valuesDict.get("temperature", None),
-        "barometricPressure": valuesDict.get("barometricPressure", None),
+        "barometricPressure": float(valuesDict.get("barometricPressure", None)),
         "relativeHumidity": valuesDict.get("relativeHumidity", None),
         "dewpoint": valuesDict.get("dewpoint", None),
-        "precipitation": valuesDict.get("precipitation", None)
+        "precipitation": valuesDict.get("precipitation", 0.0)
     }
         
     # insert into database
