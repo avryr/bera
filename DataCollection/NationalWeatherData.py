@@ -20,11 +20,11 @@ def NationalWeatherData(airportCode):
         # "https://api.weather.gov/stations/KCLE/observations/latest"
         weatherData = {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
-            "temperature": forecast['temperature']['value'],
-            "dewpoint": forecast['dewpoint']['value'],
-            "barometricPressure": forecast['barometricPressure']['value'],
-            "relativeHumidity": forecast['relativeHumidity']['value'],
-            "precipitation": forecast['precipitationLast6Hours']['value']
+            "temperature": forecast.get("temperature", {}).get("value", None),
+            "dewpoint": forecast.get("dewpoint", {}).get("value", None),
+            "barometricPressure": forecast.get("barometricPressure", {}).get("value", None),
+            "relativeHumidity": forecast.get("relativeHumidity", {}).get("value", None),
+            "precipitation": forecast.get("precipitationLast6Hours", {}).get("value", None)
         }
     except: 
         #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
