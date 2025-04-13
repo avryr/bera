@@ -10,7 +10,7 @@ import { Chart, registerables } from 'chart.js';
 
 //default input values
 const defaultLoc1 = 'W8EDU';
-const defaultLoc2 = 'NA8SA';
+const defaultLoc2 = 'N8OBJ';
 
 //funcs
 function changeLocs(loc1 : string, loc2 : string) {
