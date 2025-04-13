@@ -275,14 +275,19 @@ export default function Home() {
   const [dateTo, setDateTo] = useState(defaultDateTo);
   const [dateRender, setDateRender] = useState(true);
 
+  function reloadCharts(){
+    setDateRender(false)
+    setTimeout(() => setDateRender(true), 1);
+  }
+
+
   function handleDateChange(event : React.ChangeEvent<HTMLInputElement>) {
     if(event.target.id == 'from'){
         setDateFrom(event.target.value);
     }else{
         setDateTo(event.target.value);
     }
-    setDateRender(false)
-    setTimeout(() => setDateRender(true), 1);
+    reloadCharts();
   }
   
 
@@ -328,6 +333,7 @@ export default function Home() {
                 <hr />
                 {/* Checklist */}
                 <div className="checks">
+                    {/* Precipitation */}
                     <div className="form-check">
                         <input 
                           className="form-check-input" 
@@ -340,6 +346,7 @@ export default function Home() {
                         </label>
                     </div>
                     <p></p>
+                    {/* Temperature */}
                     <div className="form-check">
                         <input 
                           className="form-check-input" 
@@ -352,6 +359,7 @@ export default function Home() {
                         </label>
                     </div>
                     <p></p>
+                    {/* Humidity */}
                     <div className="form-check">
                         <input 
                           className="form-check-input" 
@@ -361,6 +369,32 @@ export default function Home() {
                         />
                         <label className="form-check-label" htmlFor="humid">
                             Humidity
+                        </label>
+                    </div>
+                    <p></p>
+                    {/* Dewpoint */}
+                    <div className="form-check">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="dew"
+                          onChange={() => toggleChart('#dewChart')}
+                        />
+                        <label className="form-check-label" htmlFor="dew">
+                            Dewpoint
+                        </label>
+                    </div>
+                    <p></p>
+                    {/* Pressure */}
+                    <div className="form-check">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="pressure"
+                          onChange={() => toggleChart('#pressureChart')}
+                        />
+                        <label className="form-check-label" htmlFor="pressure">
+                            Pressure
                         </label>
                     </div>
                 </div>
@@ -397,6 +431,22 @@ export default function Home() {
                     <hr />
                     <div className="chart-container" style={{ height: '400px' }}>
                         {dateRender && <HumidityChart dateFrom={dateFrom} dateTo={dateTo}/>}
+                    </div>
+                </div>
+                {/* Dewpoint */}
+                <div id="dewChart">
+                    <h2>Dewpoint</h2>
+                    <hr />
+                    <div className="chart-container" style={{ height: '400px' }}>
+                        
+                    </div>
+                </div>
+                {/* Pressure */}
+                <div id="pressureChart">
+                    <h2>Presure</h2>
+                    <hr />
+                    <div className="chart-container" style={{ height: '400px' }}>
+                        
                     </div>
                 </div>
             </div>
