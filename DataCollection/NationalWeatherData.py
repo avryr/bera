@@ -29,7 +29,7 @@ def NationalWeatherData(airportCode):
     except: 
         #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
         return {
-            "timestamp": datetime.fromisoformat(forecast['timestamp']),
+            "timestamp": datetime.now(timezone.utc),
             "temperature": None,
             "dewpoint": None,
             "barometricPressure": None,
