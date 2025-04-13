@@ -18,13 +18,14 @@ def NationalWeatherData(airportCode):
         # extract only the data we want -- feel free to go to the link below for an example from the Cleveland
         # Hopkins Airport of how these docs are formatted and what data types there are:
         # "https://api.weather.gov/stations/KCLE/observations/latest"
+        precip = forecast.get("precipitationLast6Hours", {}).get("value", 0.0) #Because None values were awfully annoying
         return {
             "timestamp": datetime.fromisoformat(forecast['timestamp']),
             "temperature": forecast.get("temperature", {}).get("value", None),
             "dewpoint": forecast.get("dewpoint", {}).get("value", None),
             "barometricPressure": forecast.get("barometricPressure", {}).get("value", None),
             "relativeHumidity": forecast.get("relativeHumidity", {}).get("value", None),
-            "precipitation": forecast.get("precipitationLast6Hours", {}).get("value", 0.0)
+            "precipitation": precip if precip is not None else 0.0
         }
     except: 
         #If the NWS is down or fails to sent data for some reason, store a null value instead of breaking our program
