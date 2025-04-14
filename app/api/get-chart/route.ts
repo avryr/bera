@@ -58,7 +58,10 @@ export async function GET(request: NextRequest) {
 
         const validWeatherMetrics = [
             'temperature',
-            'relativeHumidity'
+            'relativeHumidity',
+            'precipitation',
+            'barometricPressure',
+            'dewpoint'
         ]
         
         // Determine which collection to use based on the metric
