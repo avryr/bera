@@ -13,10 +13,10 @@ const defaultLoc1 = 'W8EDU';
 const defaultLoc2 = 'N8OBJ';
 
 //chart colors
-const berBackground = '#4E445F';
-const berOutline = '#67597A';
-const weathBackground = '#C4BAFF';
-const weathOutline = '#D3CCFB';
+const berBackground = '#E56B6F';
+const berOutline = '#D593B7';
+const weathBackground = '#4E445F';
+const weathOutline = '#67597A';
 
 //funcs
 function changeLocs(loc1: string, loc2: string) {

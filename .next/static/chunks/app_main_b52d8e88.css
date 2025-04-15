@@ -15,22 +15,26 @@ body {
   color: #fff;
   padding: 0;
   margin: 0;
+  height: 2em;
+  font-size: clamp(40px, 5vw, 65px);
 }
 
 .header {
   background-color: #67597a;
-  height: 15vh;
+  height: 2em;
+  font-size: clamp(40px, 5vw, 65px);
 }
 
 .locationDisplay {
   color: #352f43;
   background-color: #f4f4f4;
   border-radius: 10px;
-  font-size: clamp(40px, 5vw, 65px);
+  font-size: clamp(20px, 5vw, 65px);
   margin: 10px;
   text-align: center;
   max-height: 75%;
   width: 50vw;
+  height: 1.5em;
 }
 
 .arrow {
@@ -53,11 +57,12 @@ button.btn.locationBtn:hover {
 
 .sidebar {
   background-color: #e2def6;
-  height: 85vh;
+  height: 90vh;
   padding: 10px;
   color: #352f43;
   position: fixed;
-  top: 15vh;
+  top: 2em;
+  font-size: clamp(40px, 5vw, 65px);
 }
 
 .checks {
