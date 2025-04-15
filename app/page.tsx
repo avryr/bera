@@ -41,581 +41,197 @@ function useInitialization() {
 // Register Chart.js components
 Chart.register(...registerables);
 
-// Temperature chart component
+// Generic chart component that handles all weather metrics
+function MetricChart({ 
+    dateFrom, 
+    dateTo, 
+    metric,
+    station = "CWRU", 
+    title, 
+    unit, 
+    minValue = undefined, 
+    maxValue = undefined 
+}: { 
+    dateFrom: string, 
+    dateTo: string, 
+    metric: string,
+    station?: string, 
+    title: string, 
+    unit: string,
+    minValue?: number,
+    maxValue?: number 
+}) {
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Bit Error Rate',
+                data: [],
+                fill: false,
+                backgroundColor: berBackground,
+                borderColor: berOutline,
+                borderWidth: 1,
+                tension: 0.1,
+                yAxisID: 'y-ber'
+            },
+            {
+                label: title,
+                data: [],
+                fill: false,
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
+                borderWidth: 1,
+                tension: 0.1,
+                yAxisID: 'y-metric'
+            }
+        ]
+    });
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Fetch bit error rate data
+        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch BER data');
+                return response.json();
+            });
+
+        // Fetch metric data
+        const metricPromise = fetch(`/api/get-chart?metric=${metric}&dateFrom=${dateFrom}&dateTo=${dateTo}&station=${station}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to fetch ${metric} data`);
+                return response.json();
+            });
+
+        // Wait for both requests to complete
+        Promise.all([berPromise, metricPromise])
+            .then(([berData, metricData]) => {
+                // Special handling for pressure (convert Pa to hPa)
+                const metricValues = metric === 'barometricPressure' 
+                    ? metricData.y.map((value: number) => value / 100)
+                    : metricData.y;
+
+                setChartData({
+                    labels: berData.x,
+                    datasets: [
+                        {
+                            ...chartData.datasets[0],
+                            data: berData.y
+                        },
+                        {
+                            ...chartData.datasets[1],
+                            data: metricValues
+                        }
+                    ]
+                });
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(`Error fetching ${metric} chart data:`, err);
+                setError(err.message);
+                setLoading(false);
+            });
+    }, [dateFrom, dateTo, metric]);
+
+    if (loading) return <div>Loading chart data...</div>;
+    if (error) return <div>Error loading chart data: {error}</div>;
+
+    const options = {
+        responsive: true,
+        scales: {
+            'y-metric': {
+                type: 'linear' as const,
+                position: 'left' as const,
+                beginAtZero: minValue === undefined,
+                min: minValue,
+                max: maxValue,
+                title: {
+                    display: true,
+                    text: `${title} (${unit})`
+                },
+                grid: {
+                    drawOnChartArea: true
+                }
+            },
+            'y-ber': {
+                type: 'linear' as const,
+                position: 'right' as const,
+                min: 0,
+                max: 1,
+                title: {
+                    display: true,
+                    text: 'Bit Error Rate (normalized)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time'
+                }
+            }
+        }
+    };
+
+    return <Line data={chartData} options={options} />;
+}
+
+// Specific chart components that use the generic component
 function TemperatureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Temperature',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-temperature'
-            }
-        ]
-    });
+    return <MetricChart 
+        dateFrom={dateFrom} 
+        dateTo={dateTo} 
+        metric="temperature" 
+        title="Temperature" 
+        unit="°C" 
+    />;
+}
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch BER data');
-                return response.json();
-            });
-
-        // Fetch temperature data
-        const tempPromise = fetch(`/api/get-chart?metric=temperature&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch temperature data');
-                return response.json();
-            });
-
-        // Wait for both requests to complete
-        Promise.all([berPromise, tempPromise])
-            .then(([berData, tempData]) => {
-                setChartData({
-                    labels: berData.x, // both datasets have the same x values
-                    datasets: [
-                        {
-                            ...chartData.datasets[0],
-                            data: berData.y
-                        },
-                        {
-                            ...chartData.datasets[1],
-                            data: tempData.y
-                        }
-                    ]
-                });
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error fetching chart data:', err);
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div>Loading chart data...</div>;
-    if (error) return <div>Error loading chart data: {error}</div>;
-
-    const options = {
-        responsive: true,
-        scales: {
-            'y-temperature': {
-                type: 'linear' as const,
-                position: 'left' as const,
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Temperature (°C)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear' as const,
-                position: 'right' as const,
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (%)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-
-    return <Line data={chartData} options={options} />;
-};
-
-//Humidity chart component
 function HumidityChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Humidity',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-humidity'
-            }
-        ]
-    });
+    return <MetricChart 
+        dateFrom={dateFrom} 
+        dateTo={dateTo} 
+        metric="relativeHumidity" 
+        title="Humidity" 
+        unit="%" 
+    />;
+}
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch BER data');
-                return response.json();
-            });
-
-        // Fetch humidity data
-        const humidityPromise = fetch(`/api/get-chart?metric=relativeHumidity&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch humidity data');
-                return response.json();
-            });
-
-        // Wait for both requests to complete
-        Promise.all([berPromise, humidityPromise])
-            .then(([berData, humidityData]) => {
-
-                setChartData({
-                    labels: berData.x, // both datasets have the same x values
-                    datasets: [
-                        {
-                            ...chartData.datasets[0],
-                            data: berData.y
-                            //originalData: berData.y // store original values for tooltips
-                        },
-                        {
-                            ...chartData.datasets[1],
-                            data: humidityData.y
-                        }
-                    ]
-                });
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error fetching chart data:', err);
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div>Loading chart data...</div>;
-    if (error) return <div>Error loading chart data: {error}</div>;
-
-    const options = {
-        responsive: true,
-        scales: {
-            'y-humidity': {
-                type: 'linear' as const,
-                position: 'left' as const,
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Humidity (%)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear' as const,
-                position: 'right' as const,
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return <Line data={chartData} options={options} />;
-};
-
-//Dewpoint chart component
 function DewpointChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Dew point',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-dewpoint'
-            }
-        ]
-    });
+    return <MetricChart 
+        dateFrom={dateFrom} 
+        dateTo={dateTo} 
+        metric="dewpoint" 
+        title="Dew point" 
+        unit="°C" 
+    />;
+}
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch BER data');
-                return response.json();
-            });
-
-        // Fetch humidity data
-        const dewpointPromise = fetch(`/api/get-chart?metric=dewpoint&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch dewpoint data');
-                return response.json();
-            });
-
-        // Wait for both requests to complete
-        Promise.all([berPromise, dewpointPromise])
-            .then(([berData, dewpointData]) => {
-
-                setChartData({
-                    labels: berData.x, // both datasets have the same x values
-                    datasets: [
-                        {
-                            ...chartData.datasets[0],
-                            data: berData.y
-                            //originalData: berData.y // store original values for tooltips
-                        },
-                        {
-                            ...chartData.datasets[1],
-                            data: dewpointData.y
-                        }
-                    ]
-                });
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error fetching chart data:', err);
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div>Loading chart data...</div>;
-    if (error) return <div>Error loading chart data: {error}</div>;
-
-    const options = {
-        responsive: true,
-        scales: {
-            'y-dewpoint': {
-                type: 'linear' as const,
-                position: 'left' as const,
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Dewpoint (°C)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear' as const,
-                position: 'right' as const,
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return <Line data={chartData} options={options} />;
-};
-
-//Precipitation chart component
 function PrecipitationChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Precipitation',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-precip'
-            }
-        ]
-    });
+    return <MetricChart 
+        dateFrom={dateFrom} 
+        dateTo={dateTo} 
+        metric="precipitation" 
+        title="Precipitation" 
+        unit="cm" 
+    />;
+}
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch BER data');
-                return response.json();
-            });
-
-        // Fetch humidity data
-        const precipPromise = fetch(`/api/get-chart?metric=precipitation&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch precipitation data');
-                return response.json();
-            });
-
-        // Wait for both requests to complete
-        Promise.all([berPromise, precipPromise])
-            .then(([berData, precipData]) => {
-
-                setChartData({
-                    labels: berData.x, // both datasets have the same x values
-                    datasets: [
-                        {
-                            ...chartData.datasets[0],
-                            data: berData.y
-                            //originalData: berData.y // store original values for tooltips
-                        },
-                        {
-                            ...chartData.datasets[1],
-                            data: precipData.y
-                        }
-                    ]
-                });
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error fetching chart data:', err);
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div>Loading chart data...</div>;
-    if (error) return <div>Error loading chart data: {error}</div>;
-
-    const options = {
-        responsive: true,
-        scales: {
-            'y-precip': {
-                type: 'linear' as const,
-                position: 'left' as const,
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Precipitation (cm)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear' as const,
-                position: 'right' as const,
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return <Line data={chartData} options={options} />;
-};
-
-//Barometric pressure chart component
 function PressureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Barometric pressure (hPa)',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-press'
-            }
-        ]
-    });
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch BER data');
-                return response.json();
-            });
-
-        // Fetch humidity data
-        const pressurePromise = fetch(`/api/get-chart?metric=barometricPressure&dateFrom=${dateFrom}&dateTo=${dateTo}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch pressure data');
-                return response.json();
-            });
-
-        // Wait for both requests to complete
-        Promise.all([berPromise, pressurePromise])
-            .then(([berData, pressureData]) => {
-                setChartData({
-                    labels: berData.x, // both datasets have the same x values
-                    datasets: [
-                        {
-                            ...chartData.datasets[0],
-                            data: berData.y
-                            //originalData: berData.y // store original values for tooltips
-                        },
-                        {
-                            ...chartData.datasets[1],
-                            data: pressureData.y.map((value: number) => value / 100)
-                        }
-                    ]
-                });
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error fetching chart data:', err);
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div>Loading chart data...</div>;
-    if (error) return <div>Error loading chart data: {error}</div>;
-
-    const options = {
-        responsive: true,
-        scales: {
-            'y-press': {
-                type: 'linear' as const,
-                position: 'left' as const,
-                beginAtZero: true,
-                min: 700,
-                max: 1500,
-                title: {
-                    display: true,
-                    text: 'Pressure (hPa)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear' as const,
-                position: 'right' as const,
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return <Line data={chartData} options={options} />;
-};
+    return <MetricChart 
+        dateFrom={dateFrom} 
+        dateTo={dateTo} 
+        metric="barometricPressure" 
+        title="Barometric pressure" 
+        unit="hPa" 
+        minValue={700}
+        maxValue={1500}
+    />;
+}
 
 export default function Home() {
     useInitialization(); // document.ready replacement
