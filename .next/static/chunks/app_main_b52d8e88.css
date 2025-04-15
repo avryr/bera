@@ -3,6 +3,13 @@ body {
   background-color: #f4f4f4;
 }
 
+.topBar {
+  position: fixed;
+  height: 15vh;
+  width: 100vw;
+  top: 0;
+}
+
 .pageTitle {
   background-color: #352f43;
   color: #fff;
@@ -40,11 +47,17 @@ button.btn.locationBtn:hover {
   background-color: #c4baff9f;
 }
 
+.inner {
+  width: 100vw;
+}
+
 .sidebar {
   background-color: #e2def6;
   height: 85vh;
   padding: 10px;
   color: #352f43;
+  position: fixed;
+  top: 15vh;
 }
 
 .checks {
@@ -95,9 +108,13 @@ a {
   color: #352f43;
   padding-top: 10px;
   padding-left: 20px;
+  position: relative;
+  top: 15vh;
+  overflow-y: scroll;
+  height: 85vh;
 }
 
-#precipChart, #tempChart, #humidChart {
+#precipChart, #tempChart, #humidChart, #dewChart, #pressureChart {
   display: none;
 }
 

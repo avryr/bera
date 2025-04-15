@@ -294,7 +294,7 @@ export default function Home() {
     return (
         <div className="container-fluid">
             {/* Header */}
-            <div className="row">
+            <div className="row topBar">
                 {/* Logo */}
                 <div className="col-sm-2 pageTitle d-flex justify-content-center align-items-center">
                     <img src="/bera.svg" className="logo" alt="BERA Logo" />
@@ -326,7 +326,7 @@ export default function Home() {
                 </div>
             </div>
             {/* Document */}
-            <div className="row">
+            <div className="row inner">
                 {/* Sidebar */}
                 <div className="col-sm-2 sidebar">
                     <h1>Data</h1>
@@ -411,6 +411,7 @@ export default function Home() {
                     </div>
                 </div>
                 {/* Charts */}
+                <div className = "col-sm-2"></div>
                 <div className="col-sm-10 charts">
                     {/* Precipitation */}
                     <div id="precipChart">

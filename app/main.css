@@ -2,6 +2,12 @@ body{
     background-color: #F4F4F4;
     
 }
+.topBar{
+    position: fixed;
+    height: 15vh;
+    width: 100vw;
+    top: 0;
+}
 .pageTitle{
     background-color: #352F43;
     color: #FFFFFF;
@@ -11,6 +17,7 @@ body{
 .header{
     background-color: #67597A;
     height: 15vh;
+    
 }
 .locationDisplay{
     color: #352F43;
@@ -34,11 +41,16 @@ button.btn.locationBtn{
 button.btn.locationBtn:hover{
     background-color: #c4baff9f;
 }
+.inner{
+    width: 100vw;
+}
 .sidebar{
     background-color: #E2DEF6;
     height: 85vh;
     padding: 10px;
     color: #352F43;
+    position: fixed;
+    top: 15vh;
 }
 .checks{
     margin-left: 10px;
@@ -81,8 +93,12 @@ a{
     color: #352F43;
     padding-top: 10px;
     padding-left: 20px;
+    position: relative;
+    top: 15vh;
+    overflow-y: scroll;
+    height: 85vh;
 }
-#precipChart, #tempChart, #humidChart{
+#precipChart, #tempChart, #humidChart, #dewChart, #pressureChart{
     display: none;
 }
 .dates{
