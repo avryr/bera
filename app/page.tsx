@@ -12,6 +12,12 @@ import { Chart, registerables } from 'chart.js';
 const defaultLoc1 = 'W8EDU';
 const defaultLoc2 = 'N8OBJ';
 
+//chart colors
+const berBackground = '#4E445F';
+const berOutline = '#67597A';
+const weathBackground = '#C4BAFF';
+const weathOutline = '#D3CCFB';
+
 //funcs
 function changeLocs(loc1: string, loc2: string) {
     // Set the text of the location spans
@@ -44,8 +50,8 @@ function TemperatureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: stri
                 label: 'Bit Error Rate',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: berBackground,
+                borderColor: berOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-ber'
@@ -54,8 +60,8 @@ function TemperatureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: stri
                 label: 'Temperature',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-temperature'
@@ -159,8 +165,8 @@ function HumidityChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Bit Error Rate',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: berBackground,
+                borderColor: berOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-ber'
@@ -169,8 +175,8 @@ function HumidityChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Humidity',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-humidity'
@@ -274,8 +280,8 @@ function DewpointChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Bit Error Rate',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: berBackground,
+                borderColor: berOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-ber'
@@ -284,8 +290,8 @@ function DewpointChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Dew point',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-dewpoint'
@@ -389,8 +395,8 @@ function PrecipitationChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: st
                 label: 'Bit Error Rate',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: berBackground,
+                borderColor: berOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-ber'
@@ -399,8 +405,8 @@ function PrecipitationChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: st
                 label: 'Precipitation',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-precip'
@@ -504,8 +510,8 @@ function PressureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Bit Error Rate',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: berBackground,
+                borderColor: berOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-ber'
@@ -514,8 +520,8 @@ function PressureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string 
                 label: 'Barometric pressure (hPa)',
                 data: [],
                 fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: weathBackground,
+                borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
                 yAxisID: 'y-press'
