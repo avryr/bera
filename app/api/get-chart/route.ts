@@ -8,7 +8,7 @@ async function connectToDatabase() {
     if (cachedClient) {
         return cachedClient;
     }
-    const uri = `mongodb+srv://get-data:QTD0djmF1PlFdrkK@bera.1e3b4.mongodb.net/?retryWrites=true&w=majority&appName=Bera`; // stored in Vercel, not the git repo this time.
+    const uri = process.env.MONGODB_URI;
     
     if (!uri) {
         throw new Error('Please define the MONGODB_URI environment variable');
