@@ -9,7 +9,7 @@ async function connectToDatabase() {
         return cachedClient;
     }
     const uri = process.env.MONGODB_URI;
-    
+
     if (!uri) {
         throw new Error('Please define the MONGODB_URI environment variable');
     }
@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         const metric = searchParams.get('metric');
         const dateFrom = searchParams.get('dateFrom');
         const dateTo = searchParams.get('dateTo');
+        const station = searchParams.get('station');
 
         if (!metric) {
             return NextResponse.json(
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
         // Connect to the database
         const client = await connectToDatabase();
         const db = client.db('Bera'); // fixme andrej: maybe make this an environment variable?
-        
+
         // Validate that the metric exists in the schema
         const validSignalMetrics = [
             'bitsPerPacket',
@@ -63,17 +64,23 @@ export async function GET(request: NextRequest) {
             'barometricPressure',
             'dewpoint'
         ]
-        
+
         // Determine which collection to use based on the metric
-        const collectionName = validSignalMetrics.includes(metric) ? 'Radio' : 'CWRU';
-        const collection = db.collection(collectionName);
-            
-        if (!validSignalMetrics.includes(metric) && !validWeatherMetrics.includes(metric)) {
+        let collectionName = 'Radio'; // default for signal metrics
+        
+        if (validSignalMetrics.includes(metric)) {
+            collectionName = 'Radio';
+        } else if (validWeatherMetrics.includes(metric)) {
+            // Use station parameter for weather metrics if provided, default to CWRU
+            collectionName = station || 'CWRU';
+        } else {
             return NextResponse.json(
                 { error: `Invalid metric. Choose one of: ${validSignalMetrics.join(', ')} or ${validWeatherMetrics.join(', ')}` },
                 { status: 400 }
             );
         }
+        
+        const collection = db.collection(collectionName);
 
         // Build query with date range if provided
         const query: any = {};
