@@ -13,8 +13,7 @@ body{
     color: #FFFFFF;
     padding: 0;
     margin: 0;
-    height: 2em;
-    font-size: clamp(40px, 5vw, 65px);
+    height: clamp(80px, 10vw, 130px);
 }
 .header{
     background-color: #67597A;
@@ -37,12 +36,15 @@ body{
 .arrow{
     color: #67597A;
 }
-button.btn.locationBtn{
+.locationBtn{
     background-color: #C4BAFF;
-    font-size: clamp(16px, 2svw, 23px);
+    font-size: clamp(16px, 2svw, 40px);
     padding: 10px;
+    border-radius: 10px;
+    width: 4.5em;
+    text-align: center;
 }
-button.btn.locationBtn:hover{
+.locationBtn:hover{
     background-color: #c4baff9f;
 }
 .inner{
@@ -54,8 +56,7 @@ button.btn.locationBtn:hover{
     padding: 10px;
     color: #352F43;
     position: fixed;
-    top: 2em;
-    font-size: clamp(40px, 5vw, 65px);
+    top: clamp(80px, 10vw, 130px);
 }
 .checks{
     margin-left: 10px;
@@ -99,7 +100,7 @@ a{
     padding-top: 10px;
     padding-left: 20px;
     position: relative;
-    top: 15vh;
+    top: clamp(80px, 10vw, 130px);
     overflow-y: scroll;
     height: 85vh;
 }

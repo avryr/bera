@@ -46,7 +46,7 @@ function MetricChart({
     dateFrom, 
     dateTo, 
     metric,
-    station = "CWRU", 
+    station,
     title, 
     unit, 
     minValue = undefined, 
@@ -181,51 +181,56 @@ function MetricChart({
 }
 
 // Specific chart components that use the generic component
-function TemperatureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
+function TemperatureChart({ dateFrom, dateTo, station  }: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
         dateTo={dateTo} 
-        metric="temperature" 
+        metric="temperature"
+        station={station} 
         title="Temperature" 
         unit="°C" 
     />;
 }
 
-function HumidityChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
+function HumidityChart({ dateFrom, dateTo, station}: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
         dateTo={dateTo} 
-        metric="relativeHumidity" 
+        metric="relativeHumidity"
+        station={station}
         title="Humidity" 
         unit="%" 
     />;
 }
 
-function DewpointChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
+function DewpointChart({ dateFrom, dateTo, station }: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
         dateTo={dateTo} 
-        metric="dewpoint" 
+        metric="dewpoint"
+        station={station} 
         title="Dew point" 
         unit="°C" 
     />;
 }
 
-function PrecipitationChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
+function PrecipitationChart({ dateFrom, dateTo, station }: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
         dateTo={dateTo} 
-        metric="precipitation" 
+        metric="precipitation"
+        station={station} 
         title="Precipitation" 
         unit="cm" 
     />;
 }
 
-function PressureChart({ dateFrom, dateTo }: { dateFrom: string, dateTo: string }) {
+function PressureChart({ dateFrom, dateTo, station }: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
         dateTo={dateTo} 
-        metric="barometricPressure" 
+        metric="barometricPressure"
+        station={station} 
         title="Barometric pressure" 
         unit="hPa" 
         minValue={700}
@@ -247,6 +252,8 @@ export default function Home() {
     const [dateTo, setDateTo] = useState(defaultDateTo);
     const [dateRender, setDateRender] = useState(true);
 
+    const [station, setStation] = useState('CWRU');
+
     function reloadCharts() {
         setDateRender(false)
         setTimeout(() => setDateRender(true), 1);
@@ -259,6 +266,12 @@ export default function Home() {
         } else {
             setDateTo(event.target.value);
         }
+        reloadCharts();
+    }
+
+    function handleStationChange(event){
+        setStation(event.target.value);
+        console.log(event.target.value + ' selected!');
         reloadCharts();
     }
 
@@ -283,15 +296,11 @@ export default function Home() {
                         {/* Change Location Button */}
                         <div className="col-sm-2">
                             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100%" }}>
-                                <button
-                                    type="button"
-                                    className="btn locationBtn"
-                                    onClick={() => {
-                                        console.log("Change Location button clicked!");
-                                    }}
-                                >
-                                    Change Location
-                                </button>
+                                <select className="custom-select locationBtn" onChange={handleStationChange}>
+                                    <option defaultValue='true' value="CWRU">CWRU</option>
+                                    <option value={"KCLE"}>KCLE</option>
+                                    <option value="KBKL">KBKL</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -390,7 +399,7 @@ export default function Home() {
                         <h2>Precipitation</h2>
                         <hr />
                         <div className="chart-container" style={{ height: '400px' }}>
-                            {dateRender && <PrecipitationChart dateFrom={dateFrom} dateTo={dateTo} />}
+                            {dateRender && <PrecipitationChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
                     {/* Temperature */}
@@ -398,7 +407,7 @@ export default function Home() {
                         <h2>Temperature</h2>
                         <hr />
                         <div className="chart-container" style={{ height: '400px' }}>
-                            {dateRender && <TemperatureChart dateFrom={dateFrom} dateTo={dateTo} />}
+                            {dateRender && <TemperatureChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
                     {/* Humidity */}
@@ -406,7 +415,7 @@ export default function Home() {
                         <h2>Humidity</h2>
                         <hr />
                         <div className="chart-container" style={{ height: '400px' }}>
-                            {dateRender && <HumidityChart dateFrom={dateFrom} dateTo={dateTo} />}
+                            {dateRender && <HumidityChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
                     {/* Dewpoint */}
@@ -414,7 +423,7 @@ export default function Home() {
                         <h2>Dewpoint</h2>
                         <hr />
                         <div className="chart-container" style={{ height: '400px' }}>
-                            {dateRender && <DewpointChart dateFrom={dateFrom} dateTo={dateTo} />}
+                            {dateRender && <DewpointChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
                     {/* Pressure */}
@@ -422,7 +431,7 @@ export default function Home() {
                         <h2>Pressure</h2>
                         <hr />
                         <div className="chart-container" style={{ height: '400px' }}>
-                            {dateRender && <PressureChart dateFrom={dateFrom} dateTo={dateTo} />}
+                            {dateRender && <PressureChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
                 </div>

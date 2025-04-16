@@ -57,8 +57,8 @@ function useInitialization() {
 }
 // Register Chart.js components
 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Chart"].register(...__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$chart$2e$js$2f$dist$2f$chart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["registerables"]);
-// Temperature chart component
-function TemperatureChart({ dateFrom, dateTo }) {
+// Generic chart component that handles all weather metrics
+function MetricChart({ dateFrom, dateTo, metric, station, title, unit, minValue = undefined, maxValue = undefined }) {
     const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
         labels: [],
         datasets: [
@@ -73,14 +73,14 @@ function TemperatureChart({ dateFrom, dateTo }) {
                 yAxisID: 'y-ber'
             },
             {
-                label: 'Temperature',
+                label: title,
                 data: [],
                 fill: false,
                 backgroundColor: weathBackground,
                 borderColor: weathOutline,
                 borderWidth: 1,
                 tension: 0.1,
-                yAxisID: 'y-temperature'
+                yAxisID: 'y-metric'
             }
         ]
     });
@@ -92,16 +92,18 @@ function TemperatureChart({ dateFrom, dateTo }) {
             if (!response.ok) throw new Error('Failed to fetch BER data');
             return response.json();
         });
-        // Fetch temperature data
-        const tempPromise = fetch(`/api/get-chart?metric=temperature&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch temperature data');
+        // Fetch metric data
+        const metricPromise = fetch(`/api/get-chart?metric=${metric}&dateFrom=${dateFrom}&dateTo=${dateTo}&station=${station}`).then((response)=>{
+            if (!response.ok) throw new Error(`Failed to fetch ${metric} data`);
             return response.json();
         });
         // Wait for both requests to complete
         Promise.all([
             berPromise,
-            tempPromise
-        ]).then(([berData, tempData])=>{
+            metricPromise
+        ]).then(([berData, metricData])=>{
+            // Special handling for pressure (convert Pa to hPa)
+            const metricValues = metric === 'barometricPressure' ? metricData.y.map((value)=>value / 100) : metricData.y;
             setChartData({
                 labels: berData.x,
                 datasets: [
@@ -111,22 +113,26 @@ function TemperatureChart({ dateFrom, dateTo }) {
                     },
                     {
                         ...chartData.datasets[1],
-                        data: tempData.y
+                        data: metricValues
                     }
                 ]
             });
             setLoading(false);
         }).catch((err)=>{
-            console.error('Error fetching chart data:', err);
+            console.error(`Error fetching ${metric} chart data:`, err);
             setError(err.message);
             setLoading(false);
         });
-    }, []);
+    }, [
+        dateFrom,
+        dateTo,
+        metric
+    ]);
     if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         children: "Loading chart data..."
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 116,
+        lineNumber: 138,
         columnNumber: 25
     }, this);
     if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -136,146 +142,21 @@ function TemperatureChart({ dateFrom, dateTo }) {
         ]
     }, void 0, true, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 117,
+        lineNumber: 139,
         columnNumber: 23
     }, this);
     const options = {
         responsive: true,
         scales: {
-            'y-temperature': {
+            'y-metric': {
                 type: 'linear',
                 position: 'left',
-                beginAtZero: true,
+                beginAtZero: minValue === undefined,
+                min: minValue,
+                max: maxValue,
                 title: {
                     display: true,
-                    text: 'Temperature (°C)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear',
-                position: 'right',
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (%)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
-        data: chartData,
-        options: options
-    }, void 0, false, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 156,
-        columnNumber: 12
-    }, this);
-}
-//Humidity chart component
-function HumidityChart({ dateFrom, dateTo }) {
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Humidity',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-humidity'
-            }
-        ]
-    });
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
-    const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch BER data');
-            return response.json();
-        });
-        // Fetch humidity data
-        const humidityPromise = fetch(`/api/get-chart?metric=relativeHumidity&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch humidity data');
-            return response.json();
-        });
-        // Wait for both requests to complete
-        Promise.all([
-            berPromise,
-            humidityPromise
-        ]).then(([berData, humidityData])=>{
-            setChartData({
-                labels: berData.x,
-                datasets: [
-                    {
-                        ...chartData.datasets[0],
-                        data: berData.y
-                    },
-                    {
-                        ...chartData.datasets[1],
-                        data: humidityData.y
-                    }
-                ]
-            });
-            setLoading(false);
-        }).catch((err)=>{
-            console.error('Error fetching chart data:', err);
-            setError(err.message);
-            setLoading(false);
-        });
-    }, []);
-    if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: "Loading chart data..."
-    }, void 0, false, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 232,
-        columnNumber: 25
-    }, this);
-    if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: [
-            "Error loading chart data: ",
-            error
-        ]
-    }, void 0, true, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 233,
-        columnNumber: 23
-    }, this);
-    const options = {
-        responsive: true,
-        scales: {
-            'y-humidity': {
-                type: 'linear',
-                position: 'left',
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Humidity (%)'
+                    text: `${title} (${unit})`
                 },
                 grid: {
                     drawOnChartArea: true
@@ -307,390 +188,80 @@ function HumidityChart({ dateFrom, dateTo }) {
         options: options
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 271,
+        lineNumber: 180,
         columnNumber: 12
     }, this);
 }
-//Dewpoint chart component
-function DewpointChart({ dateFrom, dateTo }) {
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Dew point',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-dewpoint'
-            }
-        ]
-    });
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
-    const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch BER data');
-            return response.json();
-        });
-        // Fetch humidity data
-        const dewpointPromise = fetch(`/api/get-chart?metric=dewpoint&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch dewpoint data');
-            return response.json();
-        });
-        // Wait for both requests to complete
-        Promise.all([
-            berPromise,
-            dewpointPromise
-        ]).then(([berData, dewpointData])=>{
-            setChartData({
-                labels: berData.x,
-                datasets: [
-                    {
-                        ...chartData.datasets[0],
-                        data: berData.y
-                    },
-                    {
-                        ...chartData.datasets[1],
-                        data: dewpointData.y
-                    }
-                ]
-            });
-            setLoading(false);
-        }).catch((err)=>{
-            console.error('Error fetching chart data:', err);
-            setError(err.message);
-            setLoading(false);
-        });
-    }, []);
-    if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: "Loading chart data..."
+// Specific chart components that use the generic component
+function TemperatureChart({ dateFrom, dateTo, station }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(MetricChart, {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        metric: "temperature",
+        station: station,
+        title: "Temperature",
+        unit: "°C"
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 347,
-        columnNumber: 25
-    }, this);
-    if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: [
-            "Error loading chart data: ",
-            error
-        ]
-    }, void 0, true, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 348,
-        columnNumber: 23
-    }, this);
-    const options = {
-        responsive: true,
-        scales: {
-            'y-dewpoint': {
-                type: 'linear',
-                position: 'left',
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Dewpoint (°C)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear',
-                position: 'right',
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
-        data: chartData,
-        options: options
-    }, void 0, false, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 386,
+        lineNumber: 185,
         columnNumber: 12
     }, this);
 }
-//Precipitation chart component
-function PrecipitationChart({ dateFrom, dateTo }) {
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Precipitation',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-precip'
-            }
-        ]
-    });
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
-    const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch BER data');
-            return response.json();
-        });
-        // Fetch humidity data
-        const precipPromise = fetch(`/api/get-chart?metric=precipitation&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch precipitation data');
-            return response.json();
-        });
-        // Wait for both requests to complete
-        Promise.all([
-            berPromise,
-            precipPromise
-        ]).then(([berData, precipData])=>{
-            setChartData({
-                labels: berData.x,
-                datasets: [
-                    {
-                        ...chartData.datasets[0],
-                        data: berData.y
-                    },
-                    {
-                        ...chartData.datasets[1],
-                        data: precipData.y
-                    }
-                ]
-            });
-            setLoading(false);
-        }).catch((err)=>{
-            console.error('Error fetching chart data:', err);
-            setError(err.message);
-            setLoading(false);
-        });
-    }, []);
-    if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: "Loading chart data..."
+function HumidityChart({ dateFrom, dateTo, station }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(MetricChart, {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        metric: "relativeHumidity",
+        station: station,
+        title: "Humidity",
+        unit: "%"
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 462,
-        columnNumber: 25
-    }, this);
-    if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: [
-            "Error loading chart data: ",
-            error
-        ]
-    }, void 0, true, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 463,
-        columnNumber: 23
-    }, this);
-    const options = {
-        responsive: true,
-        scales: {
-            'y-precip': {
-                type: 'linear',
-                position: 'left',
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Precipitation (cm)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear',
-                position: 'right',
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
-        data: chartData,
-        options: options
-    }, void 0, false, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 501,
+        lineNumber: 196,
         columnNumber: 12
     }, this);
 }
-//Barometric pressure chart component
-function PressureChart({ dateFrom, dateTo }) {
-    const [chartData, setChartData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
-        labels: [],
-        datasets: [
-            {
-                label: 'Bit Error Rate',
-                data: [],
-                fill: false,
-                backgroundColor: berBackground,
-                borderColor: berOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-ber'
-            },
-            {
-                label: 'Barometric pressure (hPa)',
-                data: [],
-                fill: false,
-                backgroundColor: weathBackground,
-                borderColor: weathOutline,
-                borderWidth: 1,
-                tension: 0.1,
-                yAxisID: 'y-press'
-            }
-        ]
-    });
-    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
-    const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        // Fetch bit error rate data
-        const berPromise = fetch(`/api/get-chart?metric=bitErrorRate&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch BER data');
-            return response.json();
-        });
-        // Fetch humidity data
-        const pressurePromise = fetch(`/api/get-chart?metric=barometricPressure&dateFrom=${dateFrom}&dateTo=${dateTo}`).then((response)=>{
-            if (!response.ok) throw new Error('Failed to fetch pressure data');
-            return response.json();
-        });
-        // Wait for both requests to complete
-        Promise.all([
-            berPromise,
-            pressurePromise
-        ]).then(([berData, pressureData])=>{
-            setChartData({
-                labels: berData.x,
-                datasets: [
-                    {
-                        ...chartData.datasets[0],
-                        data: berData.y
-                    },
-                    {
-                        ...chartData.datasets[1],
-                        data: pressureData.y.map((value)=>value / 100)
-                    }
-                ]
-            });
-            setLoading(false);
-        }).catch((err)=>{
-            console.error('Error fetching chart data:', err);
-            setError(err.message);
-            setLoading(false);
-        });
-    }, []);
-    if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: "Loading chart data..."
+function DewpointChart({ dateFrom, dateTo, station }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(MetricChart, {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        metric: "dewpoint",
+        station: station,
+        title: "Dew point",
+        unit: "°C"
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 576,
-        columnNumber: 25
+        lineNumber: 207,
+        columnNumber: 12
     }, this);
-    if (error) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: [
-            "Error loading chart data: ",
-            error
-        ]
-    }, void 0, true, {
-        fileName: "[project]/app/page.tsx",
-        lineNumber: 577,
-        columnNumber: 23
-    }, this);
-    const options = {
-        responsive: true,
-        scales: {
-            'y-press': {
-                type: 'linear',
-                position: 'left',
-                beginAtZero: true,
-                min: 700,
-                max: 1500,
-                title: {
-                    display: true,
-                    text: 'Pressure (hPa)'
-                },
-                grid: {
-                    drawOnChartArea: true
-                }
-            },
-            'y-ber': {
-                type: 'linear',
-                position: 'right',
-                min: 0,
-                max: 1,
-                title: {
-                    display: true,
-                    text: 'Bit Error Rate (normalized)'
-                },
-                grid: {
-                    drawOnChartArea: false
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Time'
-                }
-            }
-        }
-    };
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$chartjs$2d$2$2f$dist$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
-        data: chartData,
-        options: options
+}
+function PrecipitationChart({ dateFrom, dateTo, station }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(MetricChart, {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        metric: "precipitation",
+        station: station,
+        title: "Precipitation",
+        unit: "cm"
     }, void 0, false, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 617,
+        lineNumber: 218,
+        columnNumber: 12
+    }, this);
+}
+function PressureChart({ dateFrom, dateTo, station }) {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(MetricChart, {
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        metric: "barometricPressure",
+        station: station,
+        title: "Barometric pressure",
+        unit: "hPa",
+        minValue: 700,
+        maxValue: 1500
+    }, void 0, false, {
+        fileName: "[project]/app/page.tsx",
+        lineNumber: 229,
         columnNumber: 12
     }, this);
 }
@@ -706,6 +277,7 @@ function Home() {
     const [dateFrom, setDateFrom] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(defaultDateFrom);
     const [dateTo, setDateTo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(defaultDateTo);
     const [dateRender, setDateRender] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [station, setStation] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('CWRU');
     function reloadCharts() {
         setDateRender(false);
         setTimeout(()=>setDateRender(true), 1);
@@ -716,6 +288,11 @@ function Home() {
         } else {
             setDateTo(event.target.value);
         }
+        reloadCharts();
+    }
+    function handleStationChange(event) {
+        setStation(event.target.value);
+        console.log(event.target.value + ' selected!');
         reloadCharts();
     }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -732,12 +309,12 @@ function Home() {
                             alt: "BERA Logo"
                         }, void 0, false, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 656,
+                            lineNumber: 285,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 655,
+                        lineNumber: 284,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -757,7 +334,7 @@ function Home() {
                                                 id: "loc1"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 663,
+                                                lineNumber: 292,
                                                 columnNumber: 33
                                             }, this),
                                             " ",
@@ -765,7 +342,7 @@ function Home() {
                                                 className: "arrow fa-solid fa-arrow-right"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 663,
+                                                lineNumber: 292,
                                                 columnNumber: 57
                                             }, this),
                                             " ",
@@ -773,25 +350,25 @@ function Home() {
                                                 id: "loc2"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 663,
+                                                lineNumber: 292,
                                                 columnNumber: 107
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 662,
+                                        lineNumber: 291,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 661,
+                                    lineNumber: 290,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "col-sm-1"
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 666,
+                                    lineNumber: 295,
                                     columnNumber: 25
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -801,43 +378,66 @@ function Home() {
                                         style: {
                                             minHeight: "100%"
                                         },
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            type: "button",
-                                            className: "btn locationBtn",
-                                            onClick: ()=>{
-                                                console.log("Change Location button clicked!");
-                                            },
-                                            children: "Change Location"
-                                        }, void 0, false, {
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                            className: "custom-select locationBtn",
+                                            onChange: handleStationChange,
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                    defaultValue: "true",
+                                                    value: "CWRU",
+                                                    children: "CWRU"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/page.tsx",
+                                                    lineNumber: 300,
+                                                    columnNumber: 37
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                    value: "KCLE",
+                                                    children: "KCLE"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/page.tsx",
+                                                    lineNumber: 301,
+                                                    columnNumber: 37
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                                    value: "KBKL",
+                                                    children: "KBKL"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/page.tsx",
+                                                    lineNumber: 302,
+                                                    columnNumber: 37
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 670,
+                                            lineNumber: 299,
                                             columnNumber: 33
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 669,
+                                        lineNumber: 298,
                                         columnNumber: 29
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 668,
+                                    lineNumber: 297,
                                     columnNumber: 25
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/page.tsx",
-                            lineNumber: 660,
+                            lineNumber: 289,
                             columnNumber: 21
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 659,
+                        lineNumber: 288,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/page.tsx",
-                lineNumber: 653,
+                lineNumber: 282,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -850,12 +450,12 @@ function Home() {
                                 children: "Data"
                             }, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 688,
+                                lineNumber: 313,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 689,
+                                lineNumber: 314,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -871,7 +471,7 @@ function Home() {
                                                 onChange: ()=>toggleChart('#precipChart')
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 694,
+                                                lineNumber: 319,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -880,18 +480,18 @@ function Home() {
                                                 children: "Precipitation"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 700,
+                                                lineNumber: 325,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 693,
+                                        lineNumber: 318,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 704,
+                                        lineNumber: 329,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -904,7 +504,7 @@ function Home() {
                                                 onChange: ()=>toggleChart('#tempChart')
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 707,
+                                                lineNumber: 332,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -913,18 +513,18 @@ function Home() {
                                                 children: "Temperature"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 713,
+                                                lineNumber: 338,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 706,
+                                        lineNumber: 331,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 717,
+                                        lineNumber: 342,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -937,7 +537,7 @@ function Home() {
                                                 onChange: ()=>toggleChart('#humidChart')
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 720,
+                                                lineNumber: 345,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -946,18 +546,18 @@ function Home() {
                                                 children: "Humidity"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 726,
+                                                lineNumber: 351,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 719,
+                                        lineNumber: 344,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 730,
+                                        lineNumber: 355,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -970,7 +570,7 @@ function Home() {
                                                 onChange: ()=>toggleChart('#dewChart')
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 733,
+                                                lineNumber: 358,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -979,18 +579,18 @@ function Home() {
                                                 children: "Dewpoint"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 739,
+                                                lineNumber: 364,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 732,
+                                        lineNumber: 357,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 743,
+                                        lineNumber: 368,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1003,7 +603,7 @@ function Home() {
                                                 onChange: ()=>toggleChart('#pressureChart')
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 746,
+                                                lineNumber: 371,
                                                 columnNumber: 29
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1012,25 +612,25 @@ function Home() {
                                                 children: "Pressure"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/page.tsx",
-                                                lineNumber: 752,
+                                                lineNumber: 377,
                                                 columnNumber: 29
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 745,
+                                        lineNumber: 370,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 691,
+                                lineNumber: 316,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 687,
+                        lineNumber: 312,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1043,7 +643,7 @@ function Home() {
                                         children: "From"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 761,
+                                        lineNumber: 386,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1054,7 +654,7 @@ function Home() {
                                         onChange: handleDateChange
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 762,
+                                        lineNumber: 387,
                                         columnNumber: 25
                                     }, this),
                                     " to ",
@@ -1066,18 +666,18 @@ function Home() {
                                         onChange: handleDateChange
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 762,
+                                        lineNumber: 387,
                                         columnNumber: 133
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 760,
+                                lineNumber: 385,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 764,
+                                lineNumber: 389,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1087,25 +687,25 @@ function Home() {
                                     children: "Link to our GitHub..."
                                 }, void 0, false, {
                                     fileName: "[project]/app/page.tsx",
-                                    lineNumber: 766,
+                                    lineNumber: 391,
                                     columnNumber: 25
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 765,
+                                lineNumber: 390,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 759,
+                        lineNumber: 384,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "col-sm-2"
                     }, void 0, false, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 770,
+                        lineNumber: 395,
                         columnNumber: 17
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1118,12 +718,12 @@ function Home() {
                                         children: "Precipitation"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 774,
+                                        lineNumber: 399,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 775,
+                                        lineNumber: 400,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1133,21 +733,22 @@ function Home() {
                                         },
                                         children: dateRender && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(PrecipitationChart, {
                                             dateFrom: dateFrom,
-                                            dateTo: dateTo
+                                            dateTo: dateTo,
+                                            station: station
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 777,
+                                            lineNumber: 402,
                                             columnNumber: 44
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 776,
+                                        lineNumber: 401,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 773,
+                                lineNumber: 398,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1157,12 +758,12 @@ function Home() {
                                         children: "Temperature"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 782,
+                                        lineNumber: 407,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 783,
+                                        lineNumber: 408,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1172,21 +773,22 @@ function Home() {
                                         },
                                         children: dateRender && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(TemperatureChart, {
                                             dateFrom: dateFrom,
-                                            dateTo: dateTo
+                                            dateTo: dateTo,
+                                            station: station
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 785,
+                                            lineNumber: 410,
                                             columnNumber: 44
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 784,
+                                        lineNumber: 409,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 781,
+                                lineNumber: 406,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1196,12 +798,12 @@ function Home() {
                                         children: "Humidity"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 790,
+                                        lineNumber: 415,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 791,
+                                        lineNumber: 416,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1211,21 +813,22 @@ function Home() {
                                         },
                                         children: dateRender && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(HumidityChart, {
                                             dateFrom: dateFrom,
-                                            dateTo: dateTo
+                                            dateTo: dateTo,
+                                            station: station
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 793,
+                                            lineNumber: 418,
                                             columnNumber: 44
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 792,
+                                        lineNumber: 417,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 789,
+                                lineNumber: 414,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1235,12 +838,12 @@ function Home() {
                                         children: "Dewpoint"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 798,
+                                        lineNumber: 423,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 799,
+                                        lineNumber: 424,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1250,21 +853,22 @@ function Home() {
                                         },
                                         children: dateRender && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(DewpointChart, {
                                             dateFrom: dateFrom,
-                                            dateTo: dateTo
+                                            dateTo: dateTo,
+                                            station: station
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 801,
+                                            lineNumber: 426,
                                             columnNumber: 44
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 800,
+                                        lineNumber: 425,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 797,
+                                lineNumber: 422,
                                 columnNumber: 21
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1274,12 +878,12 @@ function Home() {
                                         children: "Pressure"
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 806,
+                                        lineNumber: 431,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 807,
+                                        lineNumber: 432,
                                         columnNumber: 25
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1289,39 +893,40 @@ function Home() {
                                         },
                                         children: dateRender && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(PressureChart, {
                                             dateFrom: dateFrom,
-                                            dateTo: dateTo
+                                            dateTo: dateTo,
+                                            station: station
                                         }, void 0, false, {
                                             fileName: "[project]/app/page.tsx",
-                                            lineNumber: 809,
+                                            lineNumber: 434,
                                             columnNumber: 44
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/page.tsx",
-                                        lineNumber: 808,
+                                        lineNumber: 433,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/page.tsx",
-                                lineNumber: 805,
+                                lineNumber: 430,
                                 columnNumber: 21
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/page.tsx",
-                        lineNumber: 771,
+                        lineNumber: 396,
                         columnNumber: 17
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/page.tsx",
-                lineNumber: 685,
+                lineNumber: 310,
                 columnNumber: 13
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/page.tsx",
-        lineNumber: 651,
+        lineNumber: 280,
         columnNumber: 9
     }, this);
 }
