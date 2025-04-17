@@ -269,7 +269,7 @@ export default function Home() {
         reloadCharts();
     }
 
-    function handleStationChange(event){
+    function handleStationChange(event: React.ChangeEvent<HTMLSelectElement>){
         setStation(event.target.value);
         console.log(event.target.value + ' selected!');
         reloadCharts();
