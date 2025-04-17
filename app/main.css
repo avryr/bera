@@ -1,6 +1,6 @@
 body{
     background-color: #F4F4F4;
-    
+    overflow: hidden;
 }
 .topBar{
     position: fixed;
@@ -19,7 +19,7 @@ body{
     background-color: #67597A;
     height: 2em;
     font-size: clamp(40px, 5vw, 65px);
-    
+    bottom: clamp(80px, 10vw, 130px);
 }
 .locationDisplay{
     color: #352F43;
@@ -59,7 +59,7 @@ body{
     top: clamp(80px, 10vw, 130px);
 }
 .checks{
-    margin-left: 10px;
+    padding-left: 10px;
     font-size: 20px;
     -webkit-user-select: none;
     user-select: none;

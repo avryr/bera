@@ -1,6 +1,7 @@
 /* [project]/app/main.css [app-client] (css) */
 body {
   background-color: #f4f4f4;
+  overflow: hidden;
 }
 
 .topBar {
@@ -22,6 +23,7 @@ body {
   background-color: #67597a;
   height: 2em;
   font-size: clamp(40px, 5vw, 65px);
+  bottom: clamp(80px, 10vw, 130px);
 }
 
 .locationDisplay {
@@ -67,7 +69,7 @@ body {
 }
 
 .checks {
-  margin-left: 10px;
+  padding-left: 10px;
   font-size: 20px;
   -webkit-user-select: none;
   user-select: none;
