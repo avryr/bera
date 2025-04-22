@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -8,34 +7,20 @@ import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 
-//default input values
-const defaultLoc1 = 'W8EDU';
-const defaultLoc2 = 'N8OBJ';
-
-//chart colors
+// CHART COLOR VARIABLES (in Hex)
+//  * "ber" -- Bit Error Rate line colors
 const berBackground = '#E56B6F';
 const berOutline = '#D593B7';
+//  * "weath" -- Weather component (temperature, pressure, etc.) metric line colors
 const weathBackground = '#4E445F';
 const weathOutline = '#67597A';
 
-//funcs
-function changeLocs(loc1: string, loc2: string) {
-    // Set the text of the location spans
-    $('#loc1').text(loc1);
-    $('#loc2').text(loc2);
-}
-function toggleChart(divID: string) {
-    $(divID).toggle();
-    console.log(divID + " clicked!");
-}
-
-// React useEffect hook instead of jQuery document ready
+// React useEffect hook
 function useInitialization() {
     useEffect(() => {
-        changeLocs(defaultLoc1, defaultLoc2);
-        // Set checkboxes to unchecked
+        //Ensures checkboxes are not checked on reload.
         $('input[type=checkbox]').prop('checked', false);
-    }, []); // Empty dependency array means this runs once on mount... I hope
+    }, []); // Empty dependency array means this runs once on mount
 }
 
 // Register Chart.js components
@@ -192,7 +177,9 @@ function MetricChart({
     return <Line data={chartData} options={options} />;
 }
 
-// Specific chart components that use the generic component
+// Functions to generate specific charts:
+//  * Takes dateFrom, dateTo, and station as paramets to draw the chart
+//  * NOTE: Charts must be reloaded using the reload function in order to redraw when a state is changed.
 function TemperatureChart({ dateFrom, dateTo, station  }: { dateFrom: string, dateTo: string, station: string}) {
     return <MetricChart 
         dateFrom={dateFrom} 
@@ -252,7 +239,9 @@ function PressureChart({ dateFrom, dateTo, station }: { dateFrom: string, dateTo
 
 export default function Home() {
     useInitialization(); // document.ready replacement
-    // default date range: 7 days from today
+
+    // Calculates and sets default date values for date input.
+    //  * Defaulted to display data from the last 7 days.
     const DateFrom = new Date();
     DateFrom.setDate(DateFrom.getDate() - 7);
     const DateTo = new Date();
@@ -260,18 +249,18 @@ export default function Home() {
     const defaultDateFrom = DateFrom.toISOString().split('T')[0];
     const defaultDateTo = DateTo.toISOString().split('T')[0];
 
-    const [dateFrom, setDateFrom] = useState(defaultDateFrom);
-    const [dateTo, setDateTo] = useState(defaultDateTo);
-    const [dateRender, setDateRender] = useState(true);
+    const [dateFrom, setDateFrom] = useState(defaultDateFrom); //State for "from" date input.
+    const [dateTo, setDateTo] = useState(defaultDateTo); //State for "to" date input. 
+    const [dateRender, setDateRender] = useState(true); //State for rendering charts. Useful for reloading.
+    const [station, setStation] = useState('CWRU'); //State for weather station.
 
-    const [station, setStation] = useState('CWRU');
-
+    //Function to reload charts. Sets renderer to false then back to true.
     function reloadCharts() {
         setDateRender(false)
-        setTimeout(() => setDateRender(true), 1);
+        setTimeout(() => setDateRender(true), 0);
     }
 
-
+    //Function for handling a date change from both date inputs. Reloads charts.
     function handleDateChange(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.id == 'from') {
             setDateFrom(event.target.value);
@@ -281,13 +270,18 @@ export default function Home() {
         reloadCharts();
     }
 
+    //Function for handling a weather station change from dropdown menu. Reloads Charts
     function handleStationChange(event: React.ChangeEvent<HTMLSelectElement>){
         setStation(event.target.value);
-        console.log(event.target.value + ' selected!');
         reloadCharts();
     }
 
+    //Function to handle a chart's visibility toggle, called by checklist checks' onChange
+    function toggleChart(divID: string) {
+        $(divID).toggle();
+    }
 
+    //Returns HTML for the webpage.
     return (
         <div className="container-fluid">
             {/* Header */}
@@ -326,7 +320,7 @@ export default function Home() {
                     <hr />
                     {/* Checklist */}
                     <div className="checks">
-                        {/* Precipitation */}
+                        {/* Precipitation Check */}
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -339,7 +333,7 @@ export default function Home() {
                             </label>
                         </div>
                         <p></p>
-                        {/* Temperature */}
+                        {/* Temperature Check */}
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -352,7 +346,7 @@ export default function Home() {
                             </label>
                         </div>
                         <p></p>
-                        {/* Humidity */}
+                        {/* Humidity Check */}
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -365,7 +359,7 @@ export default function Home() {
                             </label>
                         </div>
                         <p></p>
-                        {/* Dewpoint */}
+                        {/* Dewpoint Check */}
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -378,7 +372,7 @@ export default function Home() {
                             </label>
                         </div>
                         <p></p>
-                        {/* Pressure */}
+                        {/* Pressure Check */}
                         <div className="form-check">
                             <input
                                 className="form-check-input"
@@ -406,7 +400,7 @@ export default function Home() {
                 {/* Charts */}
                 <div className = "col-sm-2"></div>
                 <div className="col-sm-10 charts">
-                    {/* Precipitation */}
+                    {/* Precipitation Chart */}
                     <div id="precipChart">
                         <h2>Precipitation</h2>
                         <hr />
@@ -414,7 +408,7 @@ export default function Home() {
                             {dateRender && <PrecipitationChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
-                    {/* Temperature */}
+                    {/* Temperature Chart */}
                     <div id="tempChart">
                         <h2>Temperature</h2>
                         <hr />
@@ -422,7 +416,7 @@ export default function Home() {
                             {dateRender && <TemperatureChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
-                    {/* Humidity */}
+                    {/* Humidity Chart */}
                     <div id="humidChart">
                         <h2>Humidity</h2>
                         <hr />
@@ -430,7 +424,7 @@ export default function Home() {
                             {dateRender && <HumidityChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
-                    {/* Dewpoint */}
+                    {/* Dewpoint Chart */}
                     <div id="dewChart">
                         <h2>Dewpoint</h2>
                         <hr />
@@ -438,7 +432,7 @@ export default function Home() {
                             {dateRender && <DewpointChart dateFrom={dateFrom} dateTo={dateTo} station={station}/>}
                         </div>
                     </div>
-                    {/* Pressure */}
+                    {/* Pressure Chart */}
                     <div id="pressureChart">
                         <h2>Pressure</h2>
                         <hr />
