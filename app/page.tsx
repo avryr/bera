@@ -108,13 +108,25 @@ function MetricChart({
         // Wait for both requests to complete
         Promise.all([berPromise, metricPromise])
             .then(([berData, metricData]) => {
+                // Format timestamps into "month/day hour:minute"
+                const formattedLabels = berData.x.map((timestamp: string) => {
+                    const date = new Date(timestamp);
+                    return date.toLocaleString('en-US', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false // Use 24-hour format; remove if you want 12-hour format
+                    });
+                });
+
                 // Special handling for pressure (convert Pa to hPa)
                 const metricValues = metric === 'barometricPressure' 
                     ? metricData.y.map((value: number) => value / 100)
                     : metricData.y;
 
                 setChartData({
-                    labels: berData.x,
+                    labels: formattedLabels,
                     datasets: [
                         {
                             ...chartData.datasets[0],
