@@ -295,7 +295,7 @@ export default function Home() {
                     <div className="row header">
                         <div className="col-sm-9 d-flex justify-content-center align-items-center" style={{ minHeight: "100%" }}>
                             <div className="panel panel-body locationDisplay">
-                                <span id="loc1"></span> <i className="arrow fa-solid fa-arrow-right"></i> <span id="loc2"></span>
+                                W8EDU <i className="arrow fa-solid fa-arrow-right"></i> N8OBJ
                             </div>
                         </div>
                         <div className="col-sm-1"></div>
