@@ -93,12 +93,12 @@ export async function GET(request: NextRequest) {
                 query.timestamp.$lte = new Date(dateTo);
             }
         }
-        // If no date range is provided, default to the last 24 hours
+        // If no date range is provided, default to the last 7 days
         if (!dateFrom && !dateTo) {
             const now = new Date();
-            const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            const aWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             query.timestamp = {
-                $gte: twentyFourHoursAgo,
+                $gte: aWeekAgo,
                 $lte: now
             };
         }
