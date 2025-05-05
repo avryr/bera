@@ -4,6 +4,7 @@ import NationalWeatherData
 import database_connection
 import fldigi_harness
 from datetime import datetime, timezone
+import sys
 
 # DATA COLLECTION!
 # NOTE: this is the central data collecting script. It calls a combination of the other scripts in order to organize
@@ -13,6 +14,12 @@ from datetime import datetime, timezone
 # Different MongoDB database --> change the database connection url & database name. See database_connection.py for instructions
 # Different non-MongoDB database --> change database_connection.py
 # Different radio data collection method? Refer to/edit fldigi_harness.py
+
+if len(sys.argv) < 2 or sys.argv[1] not in ('send', 'receive'):
+    print("Usage: python3 " + sys.argv[0] + " <send|receive>")
+    sys.exit(1)
+
+is_sender = sys.argv[1] == "send"
 
 def Start():
     # Get the current timestamp
@@ -38,13 +45,14 @@ def Start():
     database_connection.uploadToDatabase("KCLE", KCLE, timestamp)
     database_connection.uploadToDatabase("KCLE", KBKL, timestamp)
     # ADD DATA FROM FLDIGI
-    fldigi_harness.makeMeasurement(True, timestamp, ip_address)
+    fldigi_harness.makeMeasurement(is_sender, timestamp, ip_address)
 
 
 # Repeat the data collection every 30 mins.
-schedule.every(30).minutes.do(Start)
+schedule.every(1).minutes.do(Start)
 
 # Start the scheduled runs. Keeps going until you manually stop it.
+Start()
 while True:
     schedule.run_pending()
     time.sleep(1)
