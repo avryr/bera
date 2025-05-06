@@ -4,7 +4,7 @@ import NationalWeatherData
 import database_connection
 import fldigi_harness
 from datetime import datetime, timezone
-import sys
+import sys, os
 
 # DATA COLLECTION!
 # NOTE: this is the central data collecting script. It calls a combination of the other scripts in order to organize
@@ -20,6 +20,10 @@ if len(sys.argv) < 2 or sys.argv[1] not in ('send', 'receive'):
     sys.exit(1)
 
 is_sender = sys.argv[1] == "send"
+
+# Start gqrx and fldigi
+os.system("gqrx &")
+os.system("fldigi --wfall-only &")
 
 def Start():
     # Get the current timestamp
